@@ -6,9 +6,16 @@
 # Description: Build csm program
 # Last Modified: $Id: Makefile 54 2013-03-20 21:54:57Z gridge $
 
+###################
 ### Settings
-## Comment to disable debug symbols
-ENABLE_DEBUG=-g
+prefix=/usr/local
+bindir=$(prefix)/bin
+
+## Un-comment to enable debug symbols
+#ENABLE_DEBUG=-g
+
+## External programs
+INSTALL=/usr/local/bin/install -c
 
 ## Define external libraries paths
 EXTRALIBS_HEADERS=$(null-string)
@@ -19,9 +26,12 @@ EXTRALIBS_LINKER+=$(shell gpgme-config --libs)
 # ncurses and derived
 EXTRALIBS_LINKER+=-lform -lmenu -lncurses
 
-### Define other compiler and linker option 
+## Define other compiler and linker option 
 ARCH_OPTS=-m32
 #ARCH_OPTS=-m64
+
+### End of settings
+###################
 
 ### CSM Makefile header printout
 CSM="(CSM) "
@@ -47,6 +57,11 @@ csm: $(OBJECTS)
 doc:
 	@echo $(CSM)"Generating doxygen documentation"
 	@doxygen csmDoxy.conf 2>&1 > csmDoxy.log
+
+install: all
+	@echo $(CSM)"Installing csm / console-secrets binary and documentation"
+	@$(INSTALL) csm $(bindir)/csm
+	@ln -s $(bindir)/csm $(bindir)/console-secrets
 
 .PHONY: clean
 clean:
