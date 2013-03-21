@@ -164,7 +164,7 @@ int main(int argc, char **argv)
       return CSM_WRONG_CONFIG;
     }
   }
-  cfgMgr->version = "0.1.1"; // Set the CSM Version
+  cfgMgr->version = "0.1.2"; // Set the CSM Version
   cfgMgr->SetBruteForce(cfg_bruteForce);
   if (cfg_regexSearch) cfgMgr->SetSearchType(SearchRequest::REGEX);
   if (not cfg_userKey.empty())
