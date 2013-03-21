@@ -1,0 +1,56 @@
+/*
+ Project: Console-Secrets
+ Copyright (C) 2013  Simone Pagan Griso
+ Distributed WITHOUT ANY WARRANTY under the GPL-3.0 licence,
+ see the LICENCE file or visit <http://www.gnu.org/licenses/>
+ File: README
+ Description: Main page for doxygen documentation
+ Last Modified: $Id: README 54 2013-03-20 21:54:57Z gridge $
+*/
+
+/** @mainpage
+<h1> Console-Secrets (csm): a c++ Console password (and other Secrets) Management utility. </h1>
+
+Console-Secrets is a simple but flexible password manager. The reason for writing Console-Secrets lies in the need of having a simple, text-based but still flexible password manager, which is at the best of my knowledge missing from existing open-source projects. Even if the main purpose of Console-Secrets is to store password, every information that you need to keep safe is can be stored with Console-Secrets: credit card numbers, important addresses, etc.. can easily be added too. See next section for a complete list of features currently implemented.
+
+<h2> Features </h2>
+Here it is a (partial) list of features currently implemented in Console-Secrets:
+<ul>
+<li> Store information in crypted text files, easy to modify even without this program </li>
+<li> Console-based interface: command-line actions or pine-like interface</li>
+<li> Predefined (and easily customizable) account types, yet flexible and easy customization</li>
+<li> Manage several password repositories (personal, work, ...), also with different formats</li>
+<li> Labels, for an easy and flexible categorization of your accounts information </li>
+<li> Very modular structure to allow easy expansions by volunteers.. any?
+</ul>
+.. and upcoming ones:
+<ul>
+<li> Store account informations in XML files with completely customizable format</li>
+<li> Backup, import and syncronize your passwords! </li>
+<li> Passwrod generator and strenght check</li>
+<li> Security layer for a safe running environment</li>
+<li> Password expiration reminder</li>
+</ul>
+
+<h2> Status  </h2>
+ Console-Secrets is usable already as it is. However, frankly speaking, many (even basic) features are still to be implemented and I'm looking for help on this. So if you find this potentially useful and have some spare time, let me know.
+
+<h2> Development </h2>
+Console-Secrets is made to either be used as-it-is but with the idea of an easy expansion for new features. in fact, the object oriented implementation allows an easy customization of Console-Secrets features. It's easy, for example, implement a remote storage of passwords instead that using a local file, and even using an external DB with local cache. The format of the file is easily customizable too. See this documentation for an introduction of Console-Secrets structure and browse it to see the class structure! You'll be surprised how easy is to add your preferred feature.
+
+
+<h2> External libs </h2>
+A number of external code and libs have been used to implement specific actions of Console-Secrets. 
+They're not strictly needed but I used them to provide a starting layer. A big thanks goes to all the developers of that code!!
+<ul>
+<li> <a href=http://www.gnupg.org/related_software/gpgme/> GPGMe library </a>  </li>
+</ul>
+
+
+
+<h2> Licence </h2>
+<ul>
+<li> Console-Secrets is distributed under the GPL-3.0 licence. This program comes with ABSOLUTELY NO WARRANTY; This is free software, and you are welcome to redistribute it under certain conditions; see the file LICENCE, distributed with the source of this program, for furhter information.  </li>
+</ul>
+
+*/
