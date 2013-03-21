@@ -15,7 +15,7 @@ bindir=$(prefix)/bin
 #ENABLE_DEBUG=-g
 
 ## External programs
-INSTALL=/usr/local/bin/install -c
+INSTALL=/usr/bin/install -c
 
 ## Define external libraries paths
 EXTRALIBS_HEADERS=$(null-string)

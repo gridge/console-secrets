@@ -25,14 +25,14 @@ See below for a complete list of features currently implemented.
 
 2. QUICK-START
 -------------
-a) Install the needed external libraries (a.k.a. requirements)
+* a) Install the needed external libraries (a.k.a. requirements)
 In order to work we need the following libraries/programs installed:
 gnupg, gnupg-agent, gpgme, ncurses, pinentry-curses (optional)
 
 On an Ubuntu 12.04 system, for example, type:
 $ sudo apt-get install gnupg2 gnupg-agent libgpgme11 libgpgme11-dev libncurses5 libncurses5-dev pinentry-curses
 
-b) Get source code of console-secrets and compile it.
+* b) Get source code of console-secrets and compile it.
 The source can be downloaded from GitHub:
 $ git clone https://github.com/gridge/console-secrets.git
 
@@ -40,11 +40,52 @@ The compilation is still not that great (to be improved). For now just go into t
 $ make
 
 this should produce an output file names: csm
-To make the program visible system-wide, optionally you can then type
+In case of errors, please edit the Makefile accordingly, trying to see if something is obviously 
+wrong for your system in the "Settings" section (at the begin of the Makefile).
+To make the program visible system-wide, optionally you can then type 
 (with root privilegies or preceeding it with 'sudo'):
 $ make install
 
 At this point the program should be accessible system-wide.
+
+* c) Create your encryption key (if you have one already, skip this step)
+If you need to create one, you need to have gpg installed (see point a).
+You can follow many online tutorials if you're lost, but a quick-start:
+$ gpg --gen-key
+and aswer the questions (if you don't know what it's asking, leave the
+default values).
+
+* d) Configure the program for you
+Firs things first. You need to have a configuration file. Copy the template
+given as example to your home directory and rename it. From the source 
+directory of console-secrets:
+$ cp console-secrets.cfg ${HOME}/.console-secrets
+
+Now edit this new file (${HOME}/.console-secrets) and change the settings
+accordingly to your preferences. The most important ones are listed first.
+You need to set the UserKey to point to the default key you want to use;
+either the ID of the key or an unique description will work.
+See the comments in the file for more explanation on the other configurables.
+The rest, however, should have already a good default.
+Note that your secrets will be stored, by default, in a file in your home
+directory named console-secrets_${USER}.ct
+where ${USER} is your system username. Take care of this file, and make
+sure you make regular back-up of it.
+
+ e) That's it, you're ready to go!
+To enter your first secret just type:
+$csm
+and select "Add Account" from the menu.
+
+To search for stored secrets use 
+$ csm -v searchString
+to look for all the accounts which have (searchString) in them.
+Note: if the '-v' option is omitted, only the field marked as 
+"Essentials" in your records will be shown; this feature is very
+useful to quickly look up only the imporant ones.
+
+For further help just type:
+$ csm --help
 
 3. LIST OF FEATURES
 -------------
@@ -53,6 +94,7 @@ Here it is a (partial) list of features currently implemented in Console-Secrets
 * Store information in crypted text files, easy to modify even without this program 
 * Console-based interface: command-line actions or pine-like interface
 * Predefined (and easily customizable) account types, yet flexible and easy customization
+* Can specify "Essentials": a list of fields you want to be shown by default.
 * Manage several password repositories (personal, work, ...), also with different formats
 * Labels, for an easy and flexible categorization of your accounts information 
 * Very modular structure to allow easy expansions by volunteers.. any?
