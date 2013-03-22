@@ -61,7 +61,7 @@ doc:
 install: all
 	@echo $(CSM)"Installing csm / console-secrets binary and documentation"
 	@$(INSTALL) csm $(bindir)/csm
-	@ln -s $(bindir)/csm $(bindir)/console-secrets
+	@test -h $(bindir)/console-secrets || ln -s $(bindir)/csm $(bindir)/console-secrets
 
 .PHONY: clean
 clean:
