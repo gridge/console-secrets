@@ -172,6 +172,7 @@ IErrorHandler::StatusCode FormatterPlainTextTool::Decode(std::string &pFormatted
     return m_statusCode = SC_ERROR;
   }
   inStream.exceptions ( istringstream::eofbit );
+  bool startedNewRecord=false;
   bool recordRequiredFields = false;
   ARecord *newRec = 0;
   string fieldName;
@@ -182,6 +183,7 @@ IErrorHandler::StatusCode FormatterPlainTextTool::Decode(std::string &pFormatted
     getline(inStream, bufStr);
     while (true) {      
       if (bufStr.find(m_recordSep) == 0) {
+	startedNewRecord=true;
 	//new record!	
 	if (newRec != 0) {
 	  //not the first one, push previous record into pData
@@ -324,6 +326,11 @@ IErrorHandler::StatusCode FormatterPlainTextTool::Decode(std::string &pFormatted
   }
   //end of file, just check last record is complete
   if (!recordRequiredFields)  {
+    if (not startedNewRecord) {
+      //no records read.
+      log->say(ILog::WARNING, "Source is empty", this);
+      return SC_WARNING;
+    }
     if (!pBruteForce) {
       log->say(ILog::ERROR, "Last record read is not complete!", this);
       ISecurityTool::ClearString(fieldValue);

@@ -12,7 +12,7 @@ prefix=/usr/local
 bindir=$(prefix)/bin
 
 ## Un-comment to enable debug symbols
-#ENABLE_DEBUG=-g
+ENABLE_DEBUG=-g
 
 ## External programs
 INSTALL=/usr/bin/install -c
