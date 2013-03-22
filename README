@@ -131,6 +131,10 @@ Here it is a (partial) list of features currently implemented in Console-Secrets
 
 4. TIPS AND TRICKS
 -------------
+* A log file will be created in your home directory called .csm_log
+  If something goes wrong have a look or send it along with an explanation of
+  what happened.
+
 * You can decrypt your text file even without csm using simple commands like:
 $ gpg -d yourSecretsFile.ct
 edit it and then encrypt back using

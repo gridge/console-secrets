@@ -48,7 +48,7 @@ int main(int argc, char **argv)
   log = new LogLocalFile("LogSvc");
   // set specific LogLocalFile settings
   log->SetLogDetail(ILog::DEBUG); //to print initialization of log file itself
-  dynamic_cast<LogLocalFile*>(log)->SetLocalFileName("csm.log");
+  dynamic_cast<LogLocalFile*>(log)->SetLocalFileName(userHome+"/.csm_log");
   log->Init();
   // -- Running Security Service
   runningSecurityChecks = new DummyRunSecurityService("RunSecSvc");
