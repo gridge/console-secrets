@@ -9,39 +9,47 @@ Content:
 
 3. LIST OF FEATURES
 
-4. STATUS AND DEVELOPMENT
+4. TIPS AND TRICKS
 
-5. EXTERNAL LIBRARIES AND LICENCE
+5. STATUS AND DEVELOPMENT
+
+6. EXTERNAL LIBRARIES AND LICENCE
 
 
 1. INTRODUCTION
 -------------
-Console-Secrets is a simple but flexible text-based secrets manager (only command-line plus a pine-like interface). 
-The reason for writing Console-Secrets lies in the need of having a simple, text-based but still flexible password manager, 
-which is at the best of my knowledge missing from existing open-source projects, plus I like a lot ncurses-based interfaces. 
-Even if the main purpose of Console-Secrets is to store password, every information that you need to keep safe is can be 
-stored with Console-Secrets: credit card numbers, important addresses, etc.. can easily be added too. 
+Console-Secrets is a simple but flexible text-based secrets manager 
+(only command-line plus a pine-like interface). The reason for writing 
+Console-Secrets lies in the need of having a simple, text-based but still 
+flexible password manager, which is at the best of my knowledge missing from 
+existing open-source projects, plus I like a lot ncurses-based interfaces. 
+Even if the main purpose of Console-Secrets is to store password, every 
+information that you need to keep safe is can be stored with Console-Secrets: 
+credit card numbers, important addresses, etc.. can easily be added too. 
 See below for a complete list of features currently implemented.
 
 2. QUICK-START
 -------------
-* a) Install the needed external libraries (a.k.a. requirements)
+* a) Requirements.
 In order to work we need the following libraries/programs installed:
 gnupg, gnupg-agent, gpgme, ncurses, pinentry-curses (optional)
 
 On an Ubuntu 12.04 system, for example, type:
-$ sudo apt-get install gnupg2 gnupg-agent libgpgme11 libgpgme11-dev libncurses5 libncurses5-dev pinentry-curses
+$ sudo apt-get install gnupg2 gnupg-agent libgpgme11 libgpgme11-dev libncurses5 \
+libncurses5-dev pinentry-curses
 
 * b) Get source code of console-secrets and compile it.
 The source can be downloaded from GitHub:
 $ git clone https://github.com/gridge/console-secrets.git
 
-The compilation is still not that great (to be improved). For now just go into the main console-secrets directory and type:
+The compilation is still not that great (to be improved). For now just go into 
+the main console-secrets directory and type:
 $ make
 
 this should produce an output file names: csm
-In case of errors, please edit the Makefile accordingly, trying to see if something is obviously 
-wrong for your system in the "Settings" section (at the begin of the Makefile).
+In case of errors, please edit the Makefile accordingly, trying to see if 
+something is obviously wrong for your system in the "Settings" section 
+(at the begin of the Makefile).
 To make the program visible system-wide, optionally you can then type 
 (with root privilegies or preceeding it with 'sudo'):
 $ make install
@@ -65,17 +73,30 @@ Now edit this new file (${HOME}/.console-secrets) and change the settings
 accordingly to your preferences. The most important ones are listed first.
 You need to set the UserKey to point to the default key you want to use;
 either the ID of the key or an unique description will work.
+Then set the path where you want to store your secrets. Environment variables
+can also be specified, as explained in the comments of the configuration file.
+The default position is in your home directory, with a file named
+console-secrets_${USER}.ct.
 See the comments in the file for more explanation on the other configurables.
 The rest, however, should have already a good default.
-Note that your secrets will be stored, by default, in a file in your home
-directory named console-secrets_${USER}.ct
-where ${USER} is your system username. Take care of this file, and make
-sure you make regular back-up of it.
 
- e) That's it, you're ready to go!
+ e) Create the actual file to store your secrets.
+You can create this file with csm just typing:
+$ csm --create ${HOME}/console-secrets_${USER}.ct
+or whatever file name and location you prefer.
+Tale care of this file and make sure to regularly back it up, since it will
+contain all your secrets. By default the key speficied in the configuration
+
+ f) That's it, you're ready to go!
+A quick help is available calling:
+$ csm --help
+
 To enter your first secret just type:
 $csm
 and select "Add Account" from the menu.
+This will add your new secret to the file specified in the configuration file.
+Tip: If you need to share this among different system, you can safely put this
+file in a shared place (e.g. a Dropbox directory).
 
 To search for stored secrets use 
 $ csm -v searchString
@@ -91,7 +112,7 @@ $ csm --help
 -------------
 Here it is a (partial) list of features currently implemented in Console-Secrets:
 
-* Store information in crypted text files, easy to modify even without this program 
+* Store information in crypted text files, easy to modify even without this program
 * Console-based interface: command-line actions or pine-like interface
 * Predefined (and easily customizable) account types, yet flexible and easy customization
 * Can specify "Essentials": a list of fields you want to be shown by default.
@@ -101,30 +122,51 @@ Here it is a (partial) list of features currently implemented in Console-Secrets
 
 .. and upcoming ones:
 
+* Browse and edit existing accounts from the text user interface
 * Store account informations in XML files with completely customizable format
 * Backup, import and syncronize your passwords! 
 * Passwrod generator and strenght check
 * Security layer for a safe running environment
 * Password expiration reminder
 
-
-4. STATUS AND DEVELOPMENT
+4. TIPS AND TRICKS
 -------------
- Console-Secrets is usable already as it is. However, frankly speaking, many (even basic) features 
-are still to be implemented and I'm looking for help on this. 
-So if you find this potentially useful and have some spare time, let me know.
+* You can decrypt your text file even without csm using simple commands like:
+$ gpg -d yourSecretsFile.ct
+edit it and then encrypt back using
+$ gpg -r yourKey -e yourSecretsFile.ct
+(make sure to delete any back-up file that may be left-over, in general
+this is not a very safe procedure and I look forward implementing the above 
+feature to make this process decrypting only in memory)
+The format of the file is straightforward and you can edit and change things.
 
- Console-Secrets is made to either be used as-it-is but with the idea of an easy expansion for new features. 
-in fact, the object oriented implementation allows an easy customization of Console-Secrets features. 
-It's easy, for example, implement a remote storage of passwords instead that using a local file, 
-and even using an external DB with local cache. The format of the file is easily customizable too. 
-See this documentation for an introduction of Console-Secrets structure and browse it to see the class structure! 
-You'll be surprised how easy is to add your preferred feature.
+* While a remote storage of secrets is not developed yet, you can easily share
+your secrets among different systems using existing remote file storage systems,
+like dropbox or many others. 
 
- See also the doxygen documentation for a more up-to-date list of things that remain to do.
+5. STATUS AND DEVELOPMENT
+-------------
+ Console-Secrets is usable already as it is. However, frankly speaking, many 
+(even basic) features are still to be implemented and I'm looking for help 
+on this. So if you find this potentially useful and have some spare time, 
+let me know.
+
+ Console-Secrets is made to either be used as-it-is but with the idea of an easy
+expansion for new features. in fact, the object oriented implementation allows 
+an easy customization of Console-Secrets features. 
+It's easy, for example, implement a remote storage of passwords instead that 
+using a local file, and even using an external DB with local cache. The format 
+of the file is easily customizable too. See this documentation for an 
+introduction of Console-Secrets structure and browse it to see the class 
+structure! You'll be surprised how easy is to add your preferred feature.
+
+ See also the doxygen documentation for a more up-to-date list of things 
+that remain to do. You can build it just typing:
+$ make doc
+and making sure doxygen is installed in your system.
 
 
-5. EXTERNAL LIBRARIES AND LICENCE
+6. EXTERNAL LIBRARIES AND LICENCE
 -------------
 A number of external code and libs have been used to implement specific actions of Console-Secrets. 
 They're not strictly needed but I used them to provide a starting layer. A big thanks goes to all the developers of that code!!
