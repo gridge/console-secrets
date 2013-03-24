@@ -511,13 +511,13 @@ SourceURI TuiAccount::SelectSource()
   vector<SourceURI> allSources = ioSvcM->GetManagedSources();
   // disable the following when new source creation possible
   //----
-  if (allSources.size() == 0) {
-    m_errorMsg = "No source available for storing account.";
-    m_statusCode = SC_ERROR;
-    return SourceURI("");
-  }
-  if (allSources.size() == 1)
-    return allSources[0]; //no choice..
+  //if (allSources.size() == 0) {
+  //  m_errorMsg = "No source available for storing account.";
+  //  m_statusCode = SC_ERROR;
+  //  return SourceURI("");
+  //}
+  //if (allSources.size() == 1)
+  //  return allSources[0]; //no choice..
   //----
   SourceURI itemNewSource("Create new", "=>", "<="); //add special item for creating a new source
   allSources.push_back(itemNewSource);
