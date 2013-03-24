@@ -138,7 +138,7 @@ Here it is a (partial) list of features currently implemented in Console-Secrets
 * You can decrypt your text file even without csm using simple commands like:
 $ gpg -d yourSecretsFile.ct
 edit it and then encrypt back using
-$ gpg -r yourKey -e yourSecretsFile.ct
+$ gpg --armor -r yourKey -e yourSecretsFile.ct
 (make sure to delete any back-up file that may be left-over, in general
 this is not a very safe procedure and I look forward implementing the above 
 feature to make this process decrypting only in memory)
