@@ -33,7 +33,7 @@ LocalConfigSimpleTxt::~LocalConfigSimpleTxt()
 
 IErrorHandler::StatusCode LocalConfigSimpleTxt::LoadConfig()
 {
-  *log << "Loading configuration from: " << m_source << this << ILog::endmsg;
+  *log << ILog::INFO << "Loading configuration from: " << m_source << this << ILog::endmsg;
   if (not m_cfgFile.is_open()) {
     m_cfgFile.open(m_source.c_str(), fstream::in);
     if (!m_cfgFile.is_open()) {
