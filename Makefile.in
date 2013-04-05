@@ -12,10 +12,11 @@ prefix=@prefix@
 bindir=$(prefix)/bin
 
 ## Un-comment to enable debug symbols
-ENABLE_DEBUG=@enabledebug@
+DEBUG=@enabledebug@
 
 ## External programs
-INSTALL=@INSTALL@
+#INSTALL=@INSTALL@
+INSTALL=cp -p
 LN_S=@LN_S@
 DOXYBIN=@DOXYGEN@
 
@@ -23,8 +24,8 @@ DOXYBIN=@DOXYGEN@
 EXTRALIBS_HEADERS=$(null-string)
 EXTRALIBS_LINKER=$(null-string)
 # GnuPG
-EXTRALIBS_HEADERS+=$(shell gpgme-config --cflags) -D_FILE_OFFSET_BITS=64
-EXTRALIBS_LINKER+=$(shell gpgme-config --libs)
+EXTRALIBS_HEADERS+=@GPGME_CFLAGS@
+EXTRALIBS_LINKER+=@GPGME_LIBS@
 # ncurses and derived
 EXTRALIBS_LINKER+=-lform -lmenu -lncurses
 
@@ -33,10 +34,9 @@ ARCH_OPTS=-m64
 #ARCH_OPTS=-m64
 
 ### Now steer everything together
-CXX=g++
-CC=g++
-LD=g++
-CXXFLAGS=-Wall $(ENABLE_DEBUG) $(ARCH_OPTS) $(EXTRALIBS_HEADERS)
+CXX=@CXX@
+LD=@CXX@
+CXXFLAGS=-Wall $(DEBUG) $(ARCH_OPTS) $(EXTRALIBS_HEADERS) @DEFS@
 LDLIBS=$(ARCH_OPTS) $(EXTRALIBS_LINKER)
 
 ### End of settings
@@ -58,7 +58,7 @@ csm: $(OBJECTS)
 
 doc:
 	@echo $(CSM)"Generating doxygen documentation"
-ifeq ($DOXYBIN, "")
+ifeq ($(DOXYBIN), "")
 	@echo "Doxygen not available. Re-run configure if you installed it recently."
 else
 	@$(DOXYBIN) csmDoxy.conf 2>&1 > csmDoxy.log
