@@ -8,6 +8,7 @@
 
 ###################
 ### Settings
+PACKAGE_VERSION=csm-0.2.0
 prefix=/usr/local
 bindir=$(prefix)/bin
 
@@ -44,7 +45,7 @@ OBJECTS:= $(patsubst src/%.cc,obj/%.o,$(wildcard src/*.cc))
 CXX=g++
 CC=g++
 LD=g++
-CXXFLAGS=-Wall $(ENABLE_DEBUG) $(ARCH_OPTS) $(EXTRALIBS_HEADERS)
+CXXFLAGS= -D$(PACKAGE_VERSION) -Wall $(ENABLE_DEBUG) $(ARCH_OPTS) $(EXTRALIBS_HEADERS)
 LDFLAGS=$(ARCH_OPTS) $(EXTRALIBS_LINKER)
 
 #Targets

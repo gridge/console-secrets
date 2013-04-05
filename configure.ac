@@ -42,6 +42,12 @@ AC_CHECK_HEADERS([locale.h stdlib.h string.h unistd.h], [], [misslib=1])
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL
 AC_TYPE_SIZE_T
+AC_CHECK_SIZEOF([long])
+AS_IF([test "$ac_cv_sizeof_long" -eq 4],
+     [csm_arch=-m32],
+     [AS_IF([test "$ac_cv_sizeof_long" -eq 8],
+         [csm_arch=-m64])])
+AC_SUBST([csm_arch],$csm_arch)
 
 # Checks for library functions.
 AC_CHECK_FUNCS([setlocale])

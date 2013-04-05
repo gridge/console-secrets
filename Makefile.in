@@ -30,8 +30,7 @@ EXTRALIBS_LINKER+=@GPGME_LIBS@
 EXTRALIBS_LINKER+=-lform -lmenu -lncurses
 
 ## Define other compiler and linker option 
-ARCH_OPTS=-m64
-#ARCH_OPTS=-m64
+ARCH_OPTS=@csm_arch@
 
 ### Now steer everything together
 CXX=@CXX@
