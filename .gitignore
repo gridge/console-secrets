@@ -21,3 +21,6 @@ csm.log
 obj
 docs
 externals
+Makefile
+config.log
+config.status
