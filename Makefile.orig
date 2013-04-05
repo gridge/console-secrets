@@ -45,14 +45,14 @@ CXX=g++
 CC=g++
 LD=g++
 CXXFLAGS=-Wall $(ENABLE_DEBUG) $(ARCH_OPTS) $(EXTRALIBS_HEADERS)
-LDLIBS=$(ARCH_OPTS) $(EXTRALIBS_LINKER)
+LDFLAGS=$(ARCH_OPTS) $(EXTRALIBS_LINKER)
 
 #Targets
 all: directories csm
 
 csm: $(OBJECTS)
 	@echo $(CSM)"Linking $@"
-	$(CXX) $(LDFLAGS) $^ -o $@ $(LDLIBS)
+	$(CXX) $^ -o $@ $(LDFLAGS)
 
 doc:
 	@echo $(CSM)"Generating doxygen documentation"
