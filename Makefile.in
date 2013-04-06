@@ -21,13 +21,8 @@ LN_S=@LN_S@
 DOXYBIN=@DOXYGEN@
 
 ## Define external libraries paths
-EXTRALIBS_HEADERS=$(null-string)
-EXTRALIBS_LINKER=$(null-string)
-# GnuPG
-EXTRALIBS_HEADERS+=@GPGME_CFLAGS@
-EXTRALIBS_LINKER+=@GPGME_LIBS@
-# ncurses and derived
-EXTRALIBS_LINKER+=-lform -lmenu -lncurses
+EXTRALIBS_HEADERS=@GPGME_CFLAGS@
+EXTRALIBS_LINKER=@LIBS@ @GPGME_LIBS@
 
 ## Define other compiler and linker option 
 ARCH_OPTS=@csm_arch@
