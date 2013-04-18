@@ -62,6 +62,11 @@ You can follow many online tutorials if you're lost, but a quick-start:
 $ gpg --gen-key
 and aswer the questions (if you don't know what it's asking, leave the
 default values).
+Don't forget to set an appropriate level of trust of your key (with
+$ gpg --edit-key <youKeyId>
+and issuing the command 
+gpg> trust
+and selecting the appropriate level.
 
 * d) Configure the program for you
 Firs things first. You need to have a configuration file. Copy the template
