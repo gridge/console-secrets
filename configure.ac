@@ -7,7 +7,7 @@
 # Last Modified: $Id$
 
 AC_PREREQ([2.68])
-AC_INIT([console-secrets], [csm-0.2.0], [https://github.com/gridge/console-secrets/issues])
+AC_INIT([console-secrets], [csm-0.3.0], [https://github.com/gridge/console-secrets/issues])
 AC_CONFIG_SRCDIR([src/csm.cc])
 #AC_CONFIG_HEADERS([config.h])
 
