@@ -34,7 +34,7 @@ TuiStatusBar::TuiStatusBar(string pName) : IErrorHandler(pName)
   else
     m_statusBarHeight = 2; // 2 lines = 1 (command bar) + 1 (status bar)
   m_maxDescriptionSize = 20;
-  m_headerFixedString = "CSM v";
+  m_headerFixedString = "CSM, ";
   m_headerFixedString += cfgMgr->version;  
 }
 

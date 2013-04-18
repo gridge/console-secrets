@@ -11,6 +11,8 @@
 #ifndef __CSM__
 #define __CSM__
 
+#include <string>
+
 //Include services and tools
 #include "IConfigurationService.h"
 #include "LocalConfigSimpleTxt.h"
@@ -48,5 +50,8 @@ enum CmdLineActions {
   act_createSource,
   act_nActions
 };
+
+//CSM useful global info
+std::string logFileName; ///< log file location
 
 #endif

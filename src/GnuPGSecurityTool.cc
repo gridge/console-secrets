@@ -466,6 +466,15 @@ IErrorHandler::StatusCode GnuPGSecurityTool::Encrypt(const std::string &pSource,
   gpgme_encrypt_flags_t flags;
   flags = GPGME_ENCRYPT_NO_ENCRYPT_TO; //only specified recipient, no defaults please
   err = gpgme_op_encrypt(m_context, key, flags, source, dest);
+  gpgme_encrypt_result_t result;
+  result = gpgme_op_encrypt_result (m_context);
+  if (result) {
+    if (result->invalid_recipients) {
+      *log << ILog::ERROR << "Invalid recipient: " << result->invalid_recipients->fpr
+	   << this << ILog::endmsg;
+      return m_statusCode = SC_ERROR;
+    }
+  }
   if (err != GPG_ERR_NO_ERROR) {
     *log << ILog::ERROR << "Error in encrypting data."
 	 << "Error " << gpgme_err_code(err) <<": " << gpgme_strerror(err) 

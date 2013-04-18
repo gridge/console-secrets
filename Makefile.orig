@@ -8,6 +8,7 @@
 
 ###################
 ### Settings
+PACKAGE_VERSION=csm-0.2.0
 prefix=/usr/local
 bindir=$(prefix)/bin
 
@@ -27,7 +28,7 @@ EXTRALIBS_LINKER+=$(shell gpgme-config --libs)
 EXTRALIBS_LINKER+=-lform -lmenu -lncurses
 
 ## Define other compiler and linker option 
-ARCH_OPTS=-m32
+ARCH_OPTS=-m64
 #ARCH_OPTS=-m64
 
 ### End of settings
@@ -44,15 +45,15 @@ OBJECTS:= $(patsubst src/%.cc,obj/%.o,$(wildcard src/*.cc))
 CXX=g++
 CC=g++
 LD=g++
-CXXFLAGS=-Wall $(ENABLE_DEBUG) $(ARCH_OPTS) $(EXTRALIBS_HEADERS)
-LDLIBS=$(EXTRALIBS_LINKER)
+CXXFLAGS= -D$(PACKAGE_VERSION) -Wall $(ENABLE_DEBUG) $(ARCH_OPTS) $(EXTRALIBS_HEADERS)
+LDFLAGS=$(ARCH_OPTS) $(EXTRALIBS_LINKER)
 
 #Targets
 all: directories csm
 
 csm: $(OBJECTS)
 	@echo $(CSM)"Linking $@"
-	$(CXX) $(LDFLAGS) $^ -o $@ $(LDLIBS)
+	$(CXX) $^ -o $@ $(LDFLAGS)
 
 doc:
 	@echo $(CSM)"Generating doxygen documentation"
