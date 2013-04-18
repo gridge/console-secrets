@@ -42,19 +42,23 @@ libncurses5-dev pinentry-curses
 The source can be downloaded from GitHub:
 $ git clone https://github.com/gridge/console-secrets.git
 
-The compilation is still not that great (to be improved). For now just go into 
-the main console-secrets directory and type:
+To compile the program just issue
+$ ./configure
 $ make
-
-this should produce an output file names: csm
-In case of errors, please edit the Makefile accordingly, trying to see if 
-something is obviously wrong for your system in the "Settings" section 
-(at the begin of the Makefile).
+This should produce an output file names: csm
 To make the program visible system-wide, optionally you can then type 
 (with root privilegies or preceeding it with 'sudo'):
-$ make install
+# make install
 
 At this point the program should be accessible system-wide.
+As usual you can decide where you want to install csm providing the --prefix
+option for the configure script. Type 
+$ ./configure --help
+for a list of options. 
+
+For development purposes you can also compile
+enabling debug information with:
+$ make DEBUG=-g
 
 * c) Create your encryption key (if you have one already, skip this step)
 If you need to create one, you need to have gpg installed (see point a).
