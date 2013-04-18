@@ -101,6 +101,7 @@ class ARecord {
 
   // m_fields
   void AddField(std::string pTitle, std::string &pContent); ///< Add <pTitle, pContent> to m_fields
+  void AddDebugField(std::string pTitle, std::string pContent); ///< Add <pTitle, pContent> to m_fields
   void EraseFields(); ///< Erase all the content of m_fields
   void EraseField(std::string pTitle); ///< erase elements with title pTitle from m_fields
   void EraseField(TFieldsIterator pField); ///< erase elements 

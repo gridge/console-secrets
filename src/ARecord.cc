@@ -93,6 +93,12 @@ string ARecord::GetAccountName()
   return m_accountName;
 }
 
+void ARecord::AddDebugField(std::string pTitle, std::string pContent)
+{
+  string newContent = pContent;
+  AddField(pTitle, newContent);
+}
+
 void ARecord::AddField(string pTitle, string &pContent)
 {
   string title= CSMUtils::TrimStr( pTitle );

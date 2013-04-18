@@ -44,11 +44,13 @@ int main(int argc, char **argv)
     userHome = ".";
   //cfgMgr = new LocalConfigHardcoded("ConfigSvc"); //use hard-coded settings
   cfgMgr = new LocalConfigSimpleTxt("ConfigSvc"); //use hard-coded settings
+  cfgMgr->version = PACKAGE_VERSION; // Set the CSM Version
   // -- Log service
   log = new LogLocalFile("LogSvc");
   // set specific LogLocalFile settings
   log->SetLogDetail(ILog::DEBUG); //to print initialization of log file itself
-  dynamic_cast<LogLocalFile*>(log)->SetLocalFileName(userHome+"/.csm_log");
+  logFileName=userHome+"/.csm_log";
+  dynamic_cast<LogLocalFile*>(log)->SetLocalFileName(logFileName);
   log->Init();
   // -- Running Security Service
   runningSecurityChecks = new DummyRunSecurityService("RunSecSvc");
@@ -164,7 +166,6 @@ int main(int argc, char **argv)
       return CSM_WRONG_CONFIG;
     }
   }
-  cfgMgr->version = PACKAGE_VERSION; // Set the CSM Version
   cfgMgr->SetBruteForce(cfg_bruteForce);
   if (cfg_regexSearch) cfgMgr->SetSearchType(SearchRequest::REGEX);
   if (not cfg_userKey.empty())
@@ -236,7 +237,7 @@ int main(int argc, char **argv)
   if (cfg_action == act_quickSearch) {
     log->say(ILog::INFO, "Starting quick search");
     if (errorDuringSourceLoading) {
-      cerr << "WARNING: An error occurred during source loading. Not all results may be available. Consult log file." << endl;
+      cerr << "WARNING: An error occurred during source loading. Not all results may be available. Consult log file: " << logFileName <<  endl;
     }
     //perform a quick search and quit
     vector<ARecord*> resultSearch;
@@ -284,7 +285,7 @@ int main(int argc, char **argv)
     log->say(ILog::INFO, "Starting GUI");
     tuiSvc = new TuiSvc("TUI");
     if (errorDuringSourceLoading)
-      tuiSvc->SetWelcomeMessage("WARNING: An error occurred during source loading. Not all results may be available. Consult log file.");
+      tuiSvc->SetWelcomeMessage(string("WARNING: An error occurred during source loading. Not all results may be available. Consult log file: ")+logFileName);
     else
       tuiSvc->SetWelcomeMessage("Source data loaded successfully");
     tuiSvc->Run();
@@ -318,10 +319,10 @@ int main(int argc, char **argv)
 	cerr << "ERROR: Source already exists." << endl;
       } else if (resExists == IErrorHandler::SC_ERROR) {
 	*log << ILog::ERROR << "Can't check source existence: " << inSource.GetFullURI() << ILog::endmsg;
-	cerr << "ERROR while checking for existence of source. Consult the log file." << endl;
+	cerr << "ERROR while checking for existence of source. Consult the log file: " << logFileName << endl;
       } else {
 	*log << ILog::ERROR << "Unexpected error checking for source existence: " << resExists << "; for source: " << inSource.GetFullURI() << ILog::endmsg;
-	cerr << "Unexpected error. Consult the log file." << endl;	
+	cerr << "Unexpected error. Consult the log file: " << logFileName << endl;	
       }
       CleanUp();
       return CSM_ACTION_ERROR;
@@ -341,14 +342,14 @@ int main(int argc, char **argv)
     retC = ioSvc->NewSource(inSource, cfgMgr->GetUserName(), cfgMgr->GetUserKey());
     if (retC != IErrorHandler::SC_OK) {
       log->say(ILog::FATAL, "Error detected in creating new source");
-      cerr << "Error in creating new source. Consult log file" << endl;
+      cerr << "Error in creating new source. Consult log file: " << logFileName << endl;
       CleanUp();
       return CSM_ACTION_ERROR;
     }
     retC = ioSvc->Store();
     if (retC != IErrorHandler::SC_OK) {
       log->say(ILog::FATAL, "Error detected in storing new source");
-      cerr << "Error in storing new source. Consult log file" << endl;
+      cerr << "Error in storing new source. Consult log file: " << logFileName << endl;
       CleanUp();
       return CSM_ACTION_ERROR;
     }
@@ -371,6 +372,8 @@ int main(int argc, char **argv)
        << testSource.GetField(SourceURI::NAME) << " . "
        << testSource.GetField(SourceURI::FORMAT) << ILog::endmsg;
 
+  *log << ILog::INFO << "off_t size = " << sizeof(off_t) << ILog::endmsg;
+
   //set key
   string mykey = "D941FEB9C37DBF71"; 
   MultipleSourceIOSvc *ioSvcMulti = dynamic_cast<MultipleSourceIOSvc*>(ioSvc);
@@ -384,36 +387,36 @@ int main(int argc, char **argv)
     ARecord *testRec = new ARecord();
     testRec->SetAccountName("DummyAccount1");
     testRec->AddLabel("DummyFolder1");
-    testRec->AddField("User", "pippo");
-    testRec->AddField("Password", "cavolo");
+    testRec->AddDebugField(string("User"), string("pippo"));
+    testRec->AddDebugField(string("Password"), string("cavolo"));
     testRec->AddEssential("Password");
     ioSvc->Add(testRec);
     testRec = new ARecord();
     testRec->SetAccountName("DummyAccount2");
     testRec->AddLabel("DummyFolder1");
     testRec->AddLabel("DummyFolder2");
-    testRec->AddField("User", "Bpippo");
-    testRec->AddField("Password", "Bcavolo");
-    testRec->AddField("Varie", "blah");
+    testRec->AddDebugField(string("User"), string("Bpippo"));
+    testRec->AddDebugField(string("Password"), string("Bcavolo"));
+    testRec->AddDebugField(string("Varie"), string("blah"));
     testRec->AddEssential("Password");
     testRec->AddEssential("User");
     ioSvc->Add(testRec);
     testRec = new ARecord();
     testRec->SetAccountName("DummyAccount3");
-    testRec->AddField("User", "Cpippo");
-    testRec->AddField("Password", "Ccavolo");
-    testRec->AddField("Multi", "This is a multiline input.\n This is the second line.");
+    testRec->AddDebugField(string("User"), string("Cpippo"));
+    testRec->AddDebugField(string("Password"), string("Ccavolo"));
+    testRec->AddDebugField(string("Multi"), string("This is a multiline input.\n This is the second line."));
     testRec->AddEssential("Password");
     ioSvc->Add(testRec);
     testRec = new ARecord();
     testRec->SetAccountName("DummyAccount4");
-    testRec->AddField("User", "Dpippo");
-    testRec->AddField("Password", "Dcavolo");
+    testRec->AddDebugField(string("User"), string("Dpippo"));
+    testRec->AddDebugField(string("Password"), string("Dcavolo"));
     ioSvc->Add(testRec);
     testRec = new ARecord();
     testRec->SetAccountName("DummyAccount5");
-    testRec->AddField("User", "Epippo");
-    testRec->AddField("Password", "Ecavolo");
+    testRec->AddDebugField(string("User"), string("Epippo"));
+    testRec->AddDebugField(string("Password"), string("Ecavolo"));
     testRec->AddLabel("DummyFolder2");
     ioSvc->Add(testRec);
     ioSvc->Store();
@@ -485,7 +488,7 @@ void Usage(char **argv)
   string strHelp_userDefault;
   strHelp_userDefault = getenv("USER");
 
-  cerr << "CSM v" << cfgMgr->GetCSMVersion() << " -- a c++ Console password (and other Secrets) Management utility. " << std::endl;
+  cerr << "CSM " << cfgMgr->GetCSMVersion() << " -- a c++ Console password (and other Secrets) Management utility. " << std::endl;
   cerr << "Copyright (C) 2013 Simone Pagan Griso" << std::endl;
   cerr << "This program comes with ABSOLUTELY NO WARRANTY; This is free software, and you are welcome to redistribute it under certain conditions;" << std::endl;
   cerr << "see the file LICENCE, distributed with the source of this program, for furhter information." << std::endl;
