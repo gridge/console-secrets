@@ -89,6 +89,16 @@ console-secrets_${USER}.ct.
 See the comments in the file for more explanation on the other configurables.
 The rest, however, should have already a good default.
 
+ In addition you need to setup your gnupg agent appropriately. Make sure that
+your ~/.gnupg/gpg.conf has a (non-commented) line saying: use-agent
+Then you need to configure how the gunpg agent will prompt you for a password.
+It's your choice, but I prefer having a ncurses-based authentication. You can
+achieve this having a file ~/.gnupg/gpg-agent.conf, with the lines:
+pinentry-program /usr/bin/pinentry-ncurses
+no-grab
+default-cache-ttl 1800
+
+
  e) Create the actual file to store your secrets.
 You can create this file with csm just typing:
 $ csm --create ${HOME}/console-secrets_${USER}.ct
