@@ -95,9 +95,9 @@ class TuiAccount : public ITuiPage {
   StatusCode SetRecord(ARecord* pRecord);
   /* Add fields to managed record.
    * Add to existing m_record (if null, create a new one) fields from pRecordType.
-   * It does not check for existing fields.
+   * If field exists, do not overwirte it, unlsess force=true
    */
-  StatusCode AddRecordFields(ARecord pRecordType);
+  StatusCode AddRecordFields(ARecord pRecordType, bool force=false);
 
   // - Manipulate internal source
   SourceURI GetSource();

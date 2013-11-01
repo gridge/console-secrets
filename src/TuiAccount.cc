@@ -77,13 +77,16 @@ IErrorHandler::StatusCode TuiAccount::SetRecord(ARecord* pRecord)
   return m_statusCode = SC_OK;
 }
 
-IErrorHandler::StatusCode TuiAccount::AddRecordFields(ARecord pRecordType)
+IErrorHandler::StatusCode TuiAccount::AddRecordFields(ARecord pRecordType, bool force)
 {
   if (!m_record)
     m_record = new ARecord();
   // add fields
-  for (ARecord::TFieldsIterator itf = pRecordType.GetFieldsIterBegin(); itf != pRecordType.GetFieldsIterEnd(); ++itf)    
-    m_record->AddField(itf->first, itf->second); //add field (itf->second could contain some pre-defined values for the field)
+  for (ARecord::TFieldsIterator itf = pRecordType.GetFieldsIterBegin(); itf != pRecordType.GetFieldsIterEnd(); ++itf) {
+    //check if field exists yet, if so, do not add it (unless force=true)
+    if (force or not m_record->HasField(itf->first))
+      m_record->AddField(itf->first, itf->second); //add field (itf->second could contain some pre-defined values for the field)
+  }
   // add essentials
   for (ARecord::TEssentialsIterator ite = pRecordType.GetEssentialsIterBegin(); ite != pRecordType.GetEssentialsIterEnd(); ++ite)
     m_record->AddEssential(*ite);
@@ -478,7 +481,7 @@ IErrorHandler::StatusCode TuiAccount::NewAccount()
 
   // --- create new account m_record and add predefined fields (if any)
   NewRecord();
-  AddRecordFields(accountType);
+  AddRecordFields(accountType,true); //force over-writing of fields (should not be needed)
   if (! (accountType.GetAccountName().empty() || accountType.GetAccountName() == "EMPTY"))
     m_record->SetAccountName(accountType.GetAccountName()); //default account name
 
@@ -1112,20 +1115,16 @@ void TuiAccount::UpdateAndFreeForm()
 	   << content << "'" << this << ILog::endmsg;
     }
     if (index == fNameIdx) { //Account name
-      if(fieldChanged)
-	m_record->SetAccountName( content );
+      m_record->SetAccountName( content );
     } else if (index == fLabelsIdx) {
-      if(fieldChanged) {
-	m_record->ClearLabels();
-	m_record->AddLabels( SplitListStr( content ) );
-      }
+      m_record->ClearLabels();
+      m_record->AddLabels( SplitListStr( content ) );
     } else if (index == fEssentialsIdx) {
-      if(fieldChanged) {
-	m_record->ClearEssentials();
-	m_record->AddEssentials( SplitListStr( content ) );	
-      }
+      m_record->ClearEssentials();
+      m_record->AddEssentials( SplitListStr( content ) );	
     } else {
-      if (fieldChanged) {
+      //update field if changed or if it is essential (to ensre it's stored even if empty)
+      if (fieldChanged or m_record->HasEssential(title)) { 
 	//check if field exists, if not continue (guess: that field has been deleted)
 	if (not (recordField->first == title)) {
 	  *log << ILog::ERROR << "Mismatch of fields. Needs debugging?" 
