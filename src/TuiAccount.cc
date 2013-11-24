@@ -77,13 +77,16 @@ IErrorHandler::StatusCode TuiAccount::SetRecord(ARecord* pRecord)
   return m_statusCode = SC_OK;
 }
 
-IErrorHandler::StatusCode TuiAccount::AddRecordFields(ARecord pRecordType)
+IErrorHandler::StatusCode TuiAccount::AddRecordFields(ARecord pRecordType, bool force)
 {
   if (!m_record)
     m_record = new ARecord();
   // add fields
-  for (ARecord::TFieldsIterator itf = pRecordType.GetFieldsIterBegin(); itf != pRecordType.GetFieldsIterEnd(); ++itf)    
-    m_record->AddField(itf->first, itf->second); //add field (itf->second could contain some pre-defined values for the field)
+  for (ARecord::TFieldsIterator itf = pRecordType.GetFieldsIterBegin(); itf != pRecordType.GetFieldsIterEnd(); ++itf) {
+    //check if field exists yet, if so, do not add it (unless force=true)
+    if (force or not m_record->HasField(itf->first))
+      m_record->AddField(itf->first, itf->second); //add field (itf->second could contain some pre-defined values for the field)
+  }
   // add essentials
   for (ARecord::TEssentialsIterator ite = pRecordType.GetEssentialsIterBegin(); ite != pRecordType.GetEssentialsIterEnd(); ++ite)
     m_record->AddEssential(*ite);
@@ -178,6 +181,7 @@ IErrorHandler::StatusCode TuiAccount::Display()
   CreateFields(); //draw form
   if (m_statusCode >= SC_ERROR) 
     return m_statusCode;  
+  string cutPasteBuffer; //keep buffer for cut&paste
 
   while (!quitAccount) {
 
@@ -227,9 +231,16 @@ IErrorHandler::StatusCode TuiAccount::Display()
       form_driver(m_accountForm, REQ_DEL_CHAR);      
       break;
     case CTRL('k'):
-      //TODO: implement cut into a buffer and the paste back
+      //TODO: implement cut into a buffer and the paste back (does not work in the middle of words!)
+      cutPasteBuffer=TrimStr( static_cast<char*>( field_buffer (m_accountFields[fieldSelected], 0) ) );
+      *log << ILog::DEBUG << "Cutting: " << cutPasteBuffer << ILog::endmsg;
       form_driver(m_accountForm, REQ_CLR_EOF);      
       break;
+    case CTRL('y'):
+      //paste content
+      *log << ILog::DEBUG << "Pasting: " << cutPasteBuffer << ILog::endmsg;
+      for (string::iterator itc = cutPasteBuffer.begin(); itc != cutPasteBuffer.end(); ++itc)
+	form_driver(m_accountForm, *itc);
     case KEY_ENTER:
     case 10:
     case 13:
@@ -470,7 +481,7 @@ IErrorHandler::StatusCode TuiAccount::NewAccount()
 
   // --- create new account m_record and add predefined fields (if any)
   NewRecord();
-  AddRecordFields(accountType);
+  AddRecordFields(accountType,true); //force over-writing of fields (should not be needed)
   if (! (accountType.GetAccountName().empty() || accountType.GetAccountName() == "EMPTY"))
     m_record->SetAccountName(accountType.GetAccountName()); //default account name
 
@@ -1084,7 +1095,7 @@ void TuiAccount::UpdateAndFreeForm()
 
   //update m_record looping over all fields
   // we access members directly, this partially by-pass the initial temptative of LOCK feature
-  // Call this function with the same structure of fields in the record and the form or 
+  // Call this function with the same structure of fields in the record and the form (should always be) or 
   // results can be not quite right in some peculiar cases of multiple same-name fields added/deleted.
   *log << ILog::DEBUG << "Updating m_record." << this << ILog::endmsg;
   ARecord::TFieldsIterator recordField = m_record->GetFieldsIterBegin();
@@ -1096,25 +1107,37 @@ void TuiAccount::UpdateAndFreeForm()
     string content( TrimStr( static_cast<char*>( field_buffer (m_accountFields[idx], 0) ) ) );
     int index = field_index(m_accountFields[idx]);
     //update corresponding field, if present (safe against re-draw after field deleting)
-    if (field_status(m_accountFields[idx]) != 0) { //field changed
+    bool fieldChanged(false);
+    if (field_status(m_accountFields[idx]) != 0) 
+      fieldChanged=true;
+    if (fieldChanged) {
       *log << ILog::DEBUG << "Field " << idx << ": '" << title << "' changed. Saving: '" 
 	   << content << "'" << this << ILog::endmsg;
-      if (index == fNameIdx) { //Account name
-	m_record->SetAccountName( content );
-      } else if (index == fLabelsIdx) {
-	m_record->ClearLabels();
-	m_record->AddLabels( SplitListStr( content ) );
-      } else if (index == fEssentialsIdx) {
-	m_record->ClearEssentials();
-	m_record->AddEssentials( SplitListStr( content ) );	
-      } else {
+    }
+    if (index == fNameIdx) { //Account name
+      m_record->SetAccountName( content );
+    } else if (index == fLabelsIdx) {
+      m_record->ClearLabels();
+      m_record->AddLabels( SplitListStr( content ) );
+    } else if (index == fEssentialsIdx) {
+      m_record->ClearEssentials();
+      m_record->AddEssentials( SplitListStr( content ) );	
+    } else {
+      //update field if changed or if it is essential (to ensre it's stored even if empty)
+      if (fieldChanged or m_record->HasEssential(title)) { 
 	//check if field exists, if not continue (guess: that field has been deleted)
-	if (recordField->first != title)
+	if (not (recordField->first == title)) {
+	  *log << ILog::ERROR << "Mismatch of fields. Needs debugging?" 
+	       << ". m_record->HasField(" << title << ") = " << m_record->HasField(title) 
+	       << ILog::endmsg;	 
+	  m_statusBar->StatusBar("Internal error occurred. Please DEBUG (see log file).");
 	  break;
+	}
 	//update it
 	recordField->second = TrimStr(content);
-	++recordField;
       }
+      //always advance recorditerator as well if not a special field
+      ++recordField;
     }
   } // loop over fields
   *log << ILog::DEBUG << "m_record updated." << this << ILog::endmsg;
