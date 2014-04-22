@@ -48,7 +48,7 @@ all: directories csm
 
 csm: $(OBJECTS)
 	@echo $(CSM)"Linking $@"
-	$(CXX) $(LDFLAGS) $^ -o $@ $(LDLIBS)
+	@$(CXX) $(LDFLAGS) $^ -o $@ $(LDLIBS)
 
 doc:
 	@echo $(CSM)"Generating doxygen documentation"
