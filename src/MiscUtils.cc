@@ -71,3 +71,37 @@ string CSMUtils::TrimStr(std::string pStr, const char pPad)
     end--;
   return pStr.substr(start, end-start+1);
 }
+
+int CSMUtils::parseStrDate(std::string timeStr, struct tm *returnTime)
+{
+  // Need gcc 4.8.X or greater
+  /*
+    tm myTime;
+    istringstream iss(timeStr);
+    iss.imbue(std::locale(""));
+    iss >> std::get_time(&myTime);
+    m_creationTime = mktime(&myTime);
+  */
+  bool hasValidTime(false);
+  int nf(0);
+  int day(0),month(0),year(0);
+  nf = sscanf(timeStr.c_str(), "%d/%d/%d", &day, &month, &year);
+  if (nf == 3) hasValidTime=true;
+  if (not hasValidTime) nf = sscanf(timeStr.c_str(), "%d-%d-%d", &day, &month, &year);
+  if (nf == 3) hasValidTime = true;
+  if (not hasValidTime) nf = sscanf(timeStr.c_str(), "%d/%d", &month, &year);
+  if (nf == 2) hasValidTime=true;
+  if (not hasValidTime) nf = sscanf(timeStr.c_str(), "%d-%d", &month, &year);
+  if (nf == 2) hasValidTime=true;
+  if (hasValidTime) {
+    returnTime->tm_mday = day;
+    returnTime->tm_mon = month;
+    returnTime->tm_year = year;
+    returnTime->tm_hour = 0;
+    returnTime->tm_min = 0;
+    returnTime->tm_sec = 0;
+    hasValidTime=true;
+  }  
+  if (not hasValidTime) return 1;
+  return 0;
+}

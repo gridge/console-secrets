@@ -13,6 +13,9 @@
 
 #include <string>
 #include <vector>
+#include <sstream>
+#include <stdio.h>
+#include <time.h>
 
 /** Namespace for utility contaner.
  * This namespace collects various utilities used inside CSM.
@@ -50,6 +53,9 @@ namespace CSMUtils {
    * @param string with removed leading/trailing occurrences of pPad
    */
   std::string TrimStr(std::string pStr, const char pPad=' ');
+
+  /** Parse string to check for a valid date and return tm record */
+  int parseStrDate(std::string timeStr, struct tm* returnTime);
 
 }
 

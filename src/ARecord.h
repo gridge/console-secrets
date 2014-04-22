@@ -16,6 +16,7 @@ class SingleSourceIOSvc;
 
 #include <string>
 #include <vector>
+#include <time.h>
 
 /** Define the basic data model for an account record.
  * This is the core of the informations that will be saved.
@@ -25,6 +26,8 @@ class ARecord {
  protected:
   // --- Data-Model fields -- these are the persistent members
   std::string m_accountName; ///< Unique name of the account
+  time_t m_creationTime; ///< Time of record creation
+  time_t m_lastModificationTime; ///< Time of last change
   std::vector<std::pair<std::string, std::string> >m_fields; ///< Informations associated with the record, in the form of <Title, Content>
   std::vector<std::string> m_labels; ///< Labels associated to this record
   std::vector<std::string> m_essentials; ///< Store list of m_fields.first which are marked as essentials
@@ -133,6 +136,24 @@ class ARecord {
   // m_accountId
   void SetAccountId(unsigned long pAccountId); ///< set m_accountId
   unsigned long GetAccountId(); ///< Get m_accountId
+
+  // creation/modification time
+  /** Set creation (and last modification) time. 
+   * Validates input as well.
+   * @par timeStr if null or input not valid, use current system time.
+   * @return zero on success
+   */
+  int SetCreationTime(std::string timeStr);
+  /// Retrieve creation time as string (only days)
+  std::string GetCreationTime();
+  /** Set last modification time
+   * Validates input as well.
+   * @par timeStr if null or input not valid, use current system time.
+   * @return zero on success
+   */
+  int SetModificationTime(std::string timeStr);
+  /// Retrieve last modification time as string (only days)
+  std::string GetModificationTime();
 
 };
 

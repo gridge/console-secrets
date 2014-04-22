@@ -14,6 +14,9 @@
 
 #include <sstream>
 #include <algorithm>
+//#include <locale>
+#include <stdio.h>
+#include <iomanip>
 
 //external definitions
 extern ILog *log;
@@ -23,6 +26,8 @@ using namespace std;
 ARecord::ARecord()
 {
   m_accountId = 0;
+  m_creationTime=-1;
+  m_lastModificationTime=-1;
   SetLock(UNLOCKED);
 }
 
@@ -37,6 +42,8 @@ ARecord::ARecord(const ARecord& pARecord)
   m_labels = pARecord.m_labels;
   m_essentials = pARecord.m_essentials;
   m_accountId = pARecord.m_accountId;
+  m_creationTime = pARecord.m_creationTime;
+  m_lastModificationTime = pARecord.m_lastModificationTime;
   SetLock(UNLOCKED); // New record UNLOCKED by default
 }
 
@@ -368,3 +375,74 @@ ARecord::LockStatus ARecord::GetLockStatus()
 {
   return m_lock;
 }
+
+int ARecord::SetCreationTime(std::string timeStr)
+{
+  bool hasValidTime(false);
+  if (not timeStr.empty()) {
+    //attempt to validate input time
+    tm myTime;
+    if (CSMUtils::parseStrDate(timeStr, &myTime) == 0) {
+      m_creationTime = mktime(&myTime);
+      m_lastModificationTime = m_creationTime;
+      if (m_creationTime != -1)
+	hasValidTime=true;
+    }
+  }
+  if (not hasValidTime) {
+    //get system time
+    m_creationTime = time(&m_creationTime);
+    m_lastModificationTime = m_creationTime;
+  }
+  return 0;
+}
+
+std::string ARecord::GetCreationTime()
+{
+  struct tm* tmpCreationTime = gmtime(&m_creationTime);  
+  if (!tmpCreationTime) {
+    log->say(ILog::FIXME, "Invalid date stored in ARecord", "ARecord");
+    return std::string("00/00/0000");
+  }
+  ostringstream oss;
+  oss << tmpCreationTime->tm_mday << "/"
+      << tmpCreationTime->tm_mon << "/" 
+      << tmpCreationTime->tm_year;
+  return oss.str();
+  //return asctime(tm);
+}
+
+int ARecord::SetModificationTime(std::string timeStr)
+{
+  bool hasValidTime(false);
+  if (not timeStr.empty()) {
+    //attempt to validate input time
+    tm myTime;
+    if (CSMUtils::parseStrDate(timeStr, &myTime) == 0) {
+      m_lastModificationTime = mktime(&myTime);
+      if (m_lastModificationTime != -1)
+	hasValidTime=true;
+    }
+  }
+  if (not hasValidTime) {
+    //get system time
+    m_lastModificationTime = time(&m_creationTime);
+  }
+  return 0;
+}
+
+std::string ARecord::GetModificationTime()
+{
+  struct tm* tmpModTime = gmtime(&m_lastModificationTime);  
+  if (!tmpModTime) {
+    log->say(ILog::FIXME, "Invalid date stored in ARecord", "ARecord");
+    return std::string("00/00/0000");
+  }
+  ostringstream oss;
+  oss << tmpModTime->tm_mday << "/"
+      << tmpModTime->tm_mon << "/" 
+      << tmpModTime->tm_year;
+  return oss.str();
+  //return asctime(tm);
+}
+
