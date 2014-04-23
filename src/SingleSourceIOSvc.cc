@@ -70,7 +70,7 @@ IErrorHandler::StatusCode SingleSourceIOSvc::LoadTools()
     if (type == "file") {
       m_storageTool = new LocalFileStorageTool("StorageTool", m_source);
     } else {
-      log->say(ILog::ERROR, "Unknown source type.", this);
+      *log << ILog::ERROR << "Unknown source type: " << type << this << ILog::endmsg;
       return m_statusCode = SC_NOT_IMPLEMENTED;
     }
   }
@@ -104,7 +104,7 @@ IErrorHandler::StatusCode SingleSourceIOSvc::LoadTools()
       m_zip = false;
       log->say(ILog::WARNING, string("Using a non-encrypted data source: ") + m_source.GetURI(), this);
     } else {
-      log->say(ILog::ERROR, "Unknown source format.", this);
+      *log << ILog::ERROR << "Unknown source format: " << format << this << ILog::endmsg;
       return m_statusCode = SC_NOT_IMPLEMENTED;
     }
   }

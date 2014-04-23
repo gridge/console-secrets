@@ -14,6 +14,7 @@
 #include "IFormatterTool.h"
 
 #include <string>
+#include <sstream>
 
 /** Implements IFormatterTool with a simple plain text format.
  * Code/decode a ARecord vector to/from a plain text string. 
@@ -42,12 +43,18 @@
 
 class FormatterPlainTextTool : public IFormatterTool {
  protected:
+  /// Keep versioning number
+  std::string m_versionNumber;
   /// File header for versioning.
   std::string m_header;
   /// Lines starting with these characthers define the start of a new record
   std::string m_recordSep;
   /// Used inside a record to start a new fields
   std::string m_fieldSep;
+  /// Special field for ARecord::m_creationTime
+  std::string m_creationTimeField;
+  /// Special field for ARecord::m_lastModificationTime
+  std::string m_modificationTimeField;
   /// Special field for ARecord::m_labels
   std::string m_labelsField;
   /// Special field for ARecord::m_essentials
@@ -62,6 +69,12 @@ class FormatterPlainTextTool : public IFormatterTool {
 
   /// Edit string to make it as the rules want
   StatusCode MakeSafeField(std::string &pField);
+
+  /// Decoding function evolution schema for m_format = "1.0"
+  StatusCode Decode_v1(std::istringstream &inStream, std::vector<ARecord *> &pData, int pBruteForce=0);
+  /// Decoding function for m_format = "2.0"
+  StatusCode Decode_v2(std::istringstream &inStream, std::vector<ARecord *> &pData, int pBruteForce=0);
+
  public:
   FormatterPlainTextTool(std::string pName);
   FormatterPlainTextTool(std::string pName, std::string pFormat);

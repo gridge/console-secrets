@@ -19,6 +19,7 @@ using namespace std;
 
 FormatterPlainTextTool::FormatterPlainTextTool(string pName) : IFormatterTool(pName)
 {
+  m_versionNumber = "2.0"; //set default version of format
   InitSeparators();
 }
 
@@ -34,9 +35,11 @@ FormatterPlainTextTool::~FormatterPlainTextTool()
 }
 
 void FormatterPlainTextTool::InitSeparators() {
-  m_header = "---->>CSM_PLAIN_TEXT_FORMATTER Version 1.0";
+  m_header = string("---->>CSM_PLAIN_TEXT_FORMATTER Version ") + m_versionNumber;
   m_recordSep = "---->>";
   m_fieldSep = "@@";
+  m_creationTimeField = "CREATION_TIME";
+  m_modificationTimeField = "MODIFICATION_TIME";
   m_labelsField = "LABELS";
   m_essentialsField = "ESSENTIALS";
 }
@@ -84,6 +87,11 @@ IErrorHandler::StatusCode FormatterPlainTextTool::Code(std::vector<ARecord *> pD
     string strBuf; //temporary buffer
     //Start a new record
     outStream << m_recordSep << (*r)->GetAccountName() << endl;
+    //Write creation and last modification time (write as plain string)
+    outStream << m_fieldSep << m_creationTimeField << endl;
+    outStream << (*r)->GetCreationTimeStr() << endl;
+    outStream << m_fieldSep << m_modificationTimeField << endl;
+    outStream << (*r)->GetModificationTimeStr() << endl;
     //Write Labels
     outStream << m_fieldSep << m_labelsField << endl;
     for (ARecord::TLabelsIterator lit = (*r)->GetLabelsIterBegin(); lit != (*r)->GetLabelsIterEnd(); ++lit) {
@@ -168,9 +176,22 @@ IErrorHandler::StatusCode FormatterPlainTextTool::Decode(std::string &pFormatted
   //Read and check header
   getline(inStream, bufStr);
   if (bufStr != m_header) {
+    //not the current version, enable legacy converters
+    if (bufStr == "---->>CSM_PLAIN_TEXT_FORMATTER Version 1.0") {
+      *log << ILog::INFO << "Detected format 'ct' version 1.0 source. Calling legacy converter for loading." << this << ILog::endmsg;
+      ISecurityTool::ClearString(bufStr);
+      return Decode_v1(inStream, pData, pBruteForce);
+    }
     log->say(ILog::ERROR, string("Error reading source. Header mismatch: ")+bufStr, this);
     return m_statusCode = SC_ERROR;
   }
+  //using current version of the format
+  ISecurityTool::ClearString(bufStr);
+  return Decode_v2(inStream, pData, pBruteForce);
+}
+
+IErrorHandler::StatusCode FormatterPlainTextTool::Decode_v1(istringstream &inStream, std::vector<ARecord *> &pData, int pBruteForce) {
+  string bufStr;  
   inStream.exceptions ( istringstream::eofbit );
   bool startedNewRecord=false;
   bool recordRequiredFields = false;
@@ -201,6 +222,229 @@ IErrorHandler::StatusCode FormatterPlainTextTool::Decode(std::string &pFormatted
 	newRec->SetAccountName(bufStr.substr(m_recordSep.length()));
 	bool end_labels = false;
 	bool end_essentials = false;
+	//now read labels
+	ISecurityTool::ClearString(bufStr);
+	getline(inStream, bufStr);
+	if (bufStr != (m_fieldSep + string("LABELS"))) {
+	  //we were expecting labels...
+	  if (!pBruteForce) {
+	    log->say(ILog::ERROR, string("Expecting LABELS field: ") + bufStr, this);
+	    ISecurityTool::ClearString(bufStr);
+	    ISecurityTool::ClearStrBuffer(inStream);
+	    return m_statusCode = SC_ERROR;
+	  } else {
+	    //whatever.. let's skip it
+	    log->say(ILog::WARNING, string("Not found LABELS field in record: ")+newRec->GetAccountName(), this);
+	    end_labels = true;
+	  }	  
+	}
+	while (!end_labels) {
+	  //read all labels
+	  ISecurityTool::ClearString(bufStr);
+	  getline(inStream, bufStr);
+	  if (bufStr.find(m_recordSep) == 0) {
+	    //we were not expecting this here!
+	    if (!pBruteForce) {
+	      log->say(ILog::ERROR, string("Not expecting new record here: ") + bufStr, this);
+	      ISecurityTool::ClearString(bufStr);
+	      ISecurityTool::ClearStrBuffer(inStream);
+	      return m_statusCode = SC_ERROR;
+	    } else {
+	      //whatever.. let's skip to the new one
+	      log->say(ILog::WARNING, string("Skipping to a new record without all info from the previous one: ")+newRec->GetAccountName(), this);
+	      end_labels = true;
+	      end_essentials = true;
+	      skip_record = true;
+	    }
+	  } else {
+	    if (bufStr.find(m_fieldSep) == 0) {
+	      end_labels=true;
+	    } else {
+	      newRec->AddLabel(bufStr);	      
+	    } //add new label
+	  }
+	} // end labels
+	//now read essentials
+	if (bufStr != (m_fieldSep + string("ESSENTIALS"))) {
+	  //we were expecting essentials...
+	  if (!pBruteForce) {
+	    log->say(ILog::ERROR, string("Expecting ESSENTIALS field: ") + bufStr, this);
+	    ISecurityTool::ClearString(bufStr);
+	    ISecurityTool::ClearStrBuffer(inStream);
+	    return m_statusCode = SC_ERROR;
+	  } else {
+	    //whatever.. let's skip it
+	    log->say(ILog::WARNING, string("Not found ESSENTIALS field in record: ")+newRec->GetAccountName(), this);
+	    end_essentials = true;
+	  }	  
+	}
+	while (!end_essentials) {
+	  //read all essentials
+	  ISecurityTool::ClearString(bufStr);
+	  getline(inStream, bufStr);
+	  if (bufStr.find(m_recordSep) == 0) {
+	    //we were not expecting this here!
+	    if (!pBruteForce) {
+	      log->say(ILog::ERROR, string("Not expecting new record here: ") + bufStr, this);
+	      ISecurityTool::ClearString(bufStr);
+	      ISecurityTool::ClearStrBuffer(inStream);
+	      return m_statusCode = SC_ERROR;
+	    } else {
+	      //whatever.. let's skip to the new one
+	      log->say(ILog::WARNING, string("Skipping to a new record without all info from the previous one: ")+newRec->GetAccountName(), this);
+	      end_labels = true;
+	      end_essentials = true;
+	      skip_record = true;
+	    }
+	  } else {
+	    if (bufStr.find(m_fieldSep) == 0) {
+	      end_essentials=true;
+	    } else {
+	      newRec->AddEssential(bufStr, true); //need to force, since fields are not loaded yet
+	    } //add new essential
+	  }	  
+	} // end essentials
+	recordRequiredFields = true;
+      } // new record     
+      // now read fields. Can be multi-line and optional
+      if (bufStr.find(m_fieldSep) == 0) {
+	//new field
+	if (fieldName.empty() && (!fieldValue.empty())) {
+	  //we were expecting a field name here
+	  if (!pBruteForce) {
+	    log->say(ILog::ERROR, string("Expecting FIELD declaration: ")+bufStr, this);
+	    ISecurityTool::ClearString(bufStr);
+	    ISecurityTool::ClearString(fieldValue);
+	    ISecurityTool::ClearStrBuffer(inStream);
+	    return m_statusCode = SC_ERROR;
+	  } else {
+	    //whatever.. put a dummy value
+	    fieldName = "csmRecoveredField";
+	  }
+	}
+	if ((!fieldName.empty()) && (!fieldValue.empty())) {
+	  //should not happend only for the first field
+	  newRec->AddField(fieldName, fieldValue);
+	}
+	//new fields	
+	ISecurityTool::ClearString(fieldValue);
+	fieldName = bufStr.substr(m_fieldSep.length()); 
+	ISecurityTool::ClearString(bufStr);
+	getline(inStream, bufStr); //read value
+      } // new field
+      if (!skip_record) {
+	//add field value
+	if (!fieldValue.empty())
+	  fieldValue += '\n'; //multi-line input, no \n at the end of the string
+	fieldValue += bufStr;
+	getline(inStream, bufStr); //read next line
+      }
+    } //loop over text lines
+  } catch (istringstream::failure e) {    
+    //add last field
+    if ((!fieldName.empty()) && (!fieldValue.empty()))
+      newRec->AddField(fieldName, fieldValue);    
+  }
+  //end of file, just check last record is complete
+  if (!recordRequiredFields)  {
+    if (not startedNewRecord) {
+      //no records read.
+      log->say(ILog::WARNING, "Source is empty", this);
+      return SC_WARNING;
+    }
+    if (!pBruteForce) {
+      log->say(ILog::ERROR, "Last record read is not complete!", this);
+      ISecurityTool::ClearString(fieldValue);
+      ISecurityTool::ClearStrBuffer(inStream);
+      return m_statusCode = SC_ERROR;
+    } else {
+      //just print a warning
+      log->say(ILog::WARNING, "Last record read is not complete!", this);
+      m_statusCode = SC_WARNING;
+    }
+  }
+  pData.push_back(newRec);
+
+  ISecurityTool::ClearStrBuffer(inStream);
+  ISecurityTool::ClearString(bufStr);
+  ISecurityTool::ClearString(fieldName);
+  ISecurityTool::ClearString(fieldValue);
+  return m_statusCode;
+}
+
+
+IErrorHandler::StatusCode FormatterPlainTextTool::Decode_v2(istringstream &inStream, std::vector<ARecord *> &pData, int pBruteForce) {
+  string bufStr;  
+  inStream.exceptions ( istringstream::eofbit );
+  bool startedNewRecord=false;
+  bool recordRequiredFields = false;
+  ARecord *newRec = 0;
+  string fieldName;
+  string fieldValue;
+  bool skip_record=false;
+  try {
+    ISecurityTool::ClearString(bufStr);
+    getline(inStream, bufStr);
+    while (true) {      
+      if (bufStr.find(m_recordSep) == 0) {
+	startedNewRecord=true;
+	//new record!	
+	if (newRec != 0) {
+	  //not the first one, push previous record into pData
+	  //add last field first
+	  if ((!fieldName.empty()) && (!fieldValue.empty()))
+	    newRec->AddField(fieldName, fieldValue);    
+	  pData.push_back(newRec);
+	}
+	newRec = new ARecord;
+	recordRequiredFields = false;
+	skip_record = false;
+	ISecurityTool::ClearString(fieldName);
+	ISecurityTool::ClearString(fieldValue);
+	//get account name
+	newRec->SetAccountName(bufStr.substr(m_recordSep.length()));
+	bool end_labels = false;
+	bool end_essentials = false;
+	*log << ILog::DEBUG << "Adding record: " << newRec->GetAccountName() << this << ILog::endmsg;
+	//now read creation and last modification time
+	ISecurityTool::ClearString(bufStr);
+	getline(inStream, bufStr);
+	if (bufStr != (m_fieldSep + string("CREATION_TIME"))) {
+	  if (!pBruteForce) {
+	    *log << ILog::ERROR << "Expecting CREATION_TIME, found: " << bufStr << this << ILog::endmsg;
+	    ISecurityTool::ClearString(bufStr);
+	    ISecurityTool::ClearStrBuffer(inStream);
+	    return m_statusCode = SC_ERROR;
+	  } else {
+	    *log << ILog::WARNING << "Not found CREATION_TIME. Set it to current date for record: " << newRec->GetAccountName() << this << ILog::endmsg;
+	    newRec->SetCreationTime();
+	  }
+	} else {
+	  //creation_time field found
+	  ISecurityTool::ClearString(bufStr);
+	  getline(inStream, bufStr);
+	  newRec->SetCreationTime(bufStr);
+	  *log << ILog::DEBUG << "Setting creation time: " << bufStr << this << ILog::endmsg;
+	}
+	ISecurityTool::ClearString(bufStr);
+	getline(inStream, bufStr);
+	if (bufStr != (m_fieldSep + string("MODIFICATION_TIME"))) {
+	  if (!pBruteForce) {
+	    *log << ILog::ERROR << "Expecting MODIFICATION_TIME, found: " << bufStr << this << ILog::endmsg;
+	    ISecurityTool::ClearString(bufStr);
+	    ISecurityTool::ClearStrBuffer(inStream);
+	    return m_statusCode = SC_ERROR;
+	  } else {
+	    *log << ILog::WARNING << "Not found MODIFICATION_TIME. Set it to current date for record: " << newRec->GetAccountName() << this << ILog::endmsg;
+	    newRec->SetModificationTime();
+	  }
+	} else {
+	  //creation_time field found
+	  ISecurityTool::ClearString(bufStr);
+	  getline(inStream, bufStr);
+	  newRec->SetModificationTime(bufStr);
+	  *log << ILog::DEBUG << "Setting modification time: " << bufStr << this << ILog::endmsg;
+	}	
 	//now read labels
 	ISecurityTool::ClearString(bufStr);
 	getline(inStream, bufStr);

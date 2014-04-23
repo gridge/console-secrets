@@ -26,8 +26,8 @@ using namespace std;
 ARecord::ARecord()
 {
   m_accountId = 0;
-  m_creationTime=-1;
-  m_lastModificationTime=-1;
+  //set creation time to current system time
+  SetCreationTime();
   SetLock(UNLOCKED);
 }
 
@@ -376,13 +376,13 @@ ARecord::LockStatus ARecord::GetLockStatus()
   return m_lock;
 }
 
-int ARecord::SetCreationTime(std::string timeStr)
+int ARecord::SetCreationTime(std::string pTimeStr)
 {
   bool hasValidTime(false);
-  if (not timeStr.empty()) {
+  if (not pTimeStr.empty()) {
     //attempt to validate input time
     tm myTime;
-    if (CSMUtils::parseStrDate(timeStr, &myTime) == 0) {
+    if (CSMUtils::parseStrDate(pTimeStr, &myTime) == 0) {
       m_creationTime = mktime(&myTime);
       m_lastModificationTime = m_creationTime;
       if (m_creationTime != -1)
@@ -397,7 +397,24 @@ int ARecord::SetCreationTime(std::string timeStr)
   return 0;
 }
 
-std::string ARecord::GetCreationTime()
+int ARecord::SetCreationTime(time_t pTime)
+{
+  if (pTime == 0) {
+    m_creationTime = time(&m_creationTime);
+    m_lastModificationTime = m_creationTime;
+  } else {
+    m_creationTime = pTime;
+    m_lastModificationTime = pTime;
+  }
+  return 0;
+}
+
+time_t ARecord::GetCreationTime()
+{
+  return m_creationTime;
+}
+
+std::string ARecord::GetCreationTimeStr()
 {
   struct tm* tmpCreationTime = gmtime(&m_creationTime);  
   if (!tmpCreationTime) {
@@ -406,19 +423,19 @@ std::string ARecord::GetCreationTime()
   }
   ostringstream oss;
   oss << tmpCreationTime->tm_mday << "/"
-      << tmpCreationTime->tm_mon << "/" 
-      << tmpCreationTime->tm_year;
+      << tmpCreationTime->tm_mon+1 << "/" 
+      << tmpCreationTime->tm_year+1900;
   return oss.str();
   //return asctime(tm);
 }
 
-int ARecord::SetModificationTime(std::string timeStr)
+int ARecord::SetModificationTime(std::string pTimeStr)
 {
   bool hasValidTime(false);
-  if (not timeStr.empty()) {
+  if (not pTimeStr.empty()) {
     //attempt to validate input time
     tm myTime;
-    if (CSMUtils::parseStrDate(timeStr, &myTime) == 0) {
+    if (CSMUtils::parseStrDate(pTimeStr, &myTime) == 0) {
       m_lastModificationTime = mktime(&myTime);
       if (m_lastModificationTime != -1)
 	hasValidTime=true;
@@ -426,12 +443,28 @@ int ARecord::SetModificationTime(std::string timeStr)
   }
   if (not hasValidTime) {
     //get system time
-    m_lastModificationTime = time(&m_creationTime);
+    m_lastModificationTime = time(&m_lastModificationTime);
   }
   return 0;
 }
 
-std::string ARecord::GetModificationTime()
+int ARecord::SetModificationTime(time_t pTime)
+{
+  if (pTime == 0) {
+    m_lastModificationTime = time(&m_lastModificationTime);
+  } else {
+    m_lastModificationTime = pTime;
+  }
+  return 0;
+}
+
+
+time_t ARecord::GetModificationTime()
+{
+  return m_lastModificationTime;
+}
+
+std::string ARecord::GetModificationTimeStr()
 {
   struct tm* tmpModTime = gmtime(&m_lastModificationTime);  
   if (!tmpModTime) {
@@ -440,8 +473,8 @@ std::string ARecord::GetModificationTime()
   }
   ostringstream oss;
   oss << tmpModTime->tm_mday << "/"
-      << tmpModTime->tm_mon << "/" 
-      << tmpModTime->tm_year;
+      << tmpModTime->tm_mon+1 << "/" 
+      << tmpModTime->tm_year+1900;
   return oss.str();
   //return asctime(tm);
 }

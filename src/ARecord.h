@@ -143,17 +143,25 @@ class ARecord {
    * @par timeStr if null or input not valid, use current system time.
    * @return zero on success
    */
-  int SetCreationTime(std::string timeStr);
-  /// Retrieve creation time as string (only days)
-  std::string GetCreationTime();
+  int SetCreationTime(std::string pTimeStr);
+  /// Set creation (and last modification) time. 
+  int SetCreationTime(time_t pTime=0);
+  /// Retrieve creation time
+  time_t GetCreationTime();
+  /// Retrieve creation time as string (only days)  
+  std::string GetCreationTimeStr();
   /** Set last modification time
    * Validates input as well.
    * @par timeStr if null or input not valid, use current system time.
    * @return zero on success
    */
-  int SetModificationTime(std::string timeStr);
+  int SetModificationTime(std::string pTimeStr);
+  /// Set last modification time. 
+  int SetModificationTime(time_t pTime=0);
+  /// Retrieve last modification time
+  time_t GetModificationTime();
   /// Retrieve last modification time as string (only days)
-  std::string GetModificationTime();
+  std::string GetModificationTimeStr();
 
 };
 
