@@ -95,8 +95,8 @@ int CSMUtils::parseStrDate(std::string timeStr, struct tm *returnTime)
   if (nf == 2) hasValidTime=true;
   if (hasValidTime) {
     returnTime->tm_mday = day;
-    returnTime->tm_mon = month;
-    returnTime->tm_year = year;
+    returnTime->tm_mon = month-1;
+    returnTime->tm_year = year-1900;
     returnTime->tm_hour = 0;
     returnTime->tm_min = 0;
     returnTime->tm_sec = 0;

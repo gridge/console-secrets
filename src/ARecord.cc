@@ -416,7 +416,7 @@ time_t ARecord::GetCreationTime()
 
 std::string ARecord::GetCreationTimeStr()
 {
-  struct tm* tmpCreationTime = gmtime(&m_creationTime);  
+  struct tm* tmpCreationTime = localtime(&m_creationTime);  
   if (!tmpCreationTime) {
     log->say(ILog::FIXME, "Invalid date stored in ARecord", "ARecord");
     return std::string("00/00/0000");
@@ -466,7 +466,7 @@ time_t ARecord::GetModificationTime()
 
 std::string ARecord::GetModificationTimeStr()
 {
-  struct tm* tmpModTime = gmtime(&m_lastModificationTime);  
+  struct tm* tmpModTime = localtime(&m_lastModificationTime);  
   if (!tmpModTime) {
     log->say(ILog::FIXME, "Invalid date stored in ARecord", "ARecord");
     return std::string("00/00/0000");
