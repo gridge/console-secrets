@@ -255,7 +255,9 @@ int main(int argc, char **argv)
       if (cfg_verboseSearchResults) {
 	cout << "===============" << endl;
 	cout << " Account name: " << (*it)->GetAccountName() << endl;
-	cout << " Account Id = "  << (*it)->GetAccountId() << endl;
+	cout << " Account Id: "  << (*it)->GetAccountId() << endl;
+	cout << " Creation date: " << (*it)->GetCreationTimeStr() << endl;
+	cout << " Last Modification: " << (*it)->GetModificationTimeStr() << endl;
 	cout << " Labels: ";
 	for (ARecord::TLabelsIterator lit = (*it)->GetLabelsIterBegin(); lit != (*it)->GetLabelsIterEnd(); ++lit)
 	  cout << *lit <<",";
@@ -269,6 +271,7 @@ int main(int argc, char **argv)
 	  cout << "  " << fit->first <<": " << fit->second << endl;
       } else { //non-verbose printing
 	cout << "Account name: " << (*it)->GetAccountName() << endl;
+	cout << " Last Modification: " << (*it)->GetModificationTimeStr() << endl;
 	//just print essentials fields
 	for (ARecord::TEssentialsIterator eit = (*it)->GetEssentialsIterBegin(); eit != (*it)->GetEssentialsIterEnd(); ++eit) {
 	  if ((*it)->HasField(*eit))
