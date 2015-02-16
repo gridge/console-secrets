@@ -11,6 +11,9 @@
 #ifndef __TUIACCOUNT__
 #define __TUIACCOUNT__
 
+#include <cstdlib>
+#include <string.h> // need to use strcpy for storing userptr of ncurses
+
 #include "ITuiPage.h"
 #include "SourceURI.h"
 #include "ARecord.h"

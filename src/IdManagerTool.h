@@ -27,7 +27,7 @@ class IdManagerTool : public IErrorHandler {
   std::map<unsigned long, std::string> m_idData;  
  public:
   IdManagerTool(std::string pName);
-  ~IdManagerTool();
+  virtual ~IdManagerTool();
 
   /** Get new Id for the source pSource.
    * @return new Id, returns 0 if not succesfull.

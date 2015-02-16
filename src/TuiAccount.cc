@@ -23,7 +23,6 @@ extern IIOService *ioSvc;
 extern TuiSvc *tuiSvc;
 
 #include <algorithm>
-#include <string.h> // need to use strcpy for storing userptr of ncurses
 
 using namespace Ncurses;
 using namespace std;

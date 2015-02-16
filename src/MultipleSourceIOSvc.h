@@ -36,7 +36,7 @@ class MultipleSourceIOSvc : public IIOService {
   SingleSourceIOSvc* GetSingleSource(SourceURI pSource);
  public:
   MultipleSourceIOSvc(std::string pName);
-  ~MultipleSourceIOSvc();
+  virtual ~MultipleSourceIOSvc();
 
   ///(Re-)Load source
   virtual StatusCode Load();

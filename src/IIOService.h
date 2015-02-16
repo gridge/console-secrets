@@ -44,7 +44,7 @@ class IIOService : public IErrorHandler {
  public:
   IIOService(std::string pName);
   IIOService(std::string pName, std::string owner);
-  ~IIOService();
+  virtual ~IIOService();
 
   // --- Implement methods that need to be defined in an IIOService implementation
   /** Load data from source.

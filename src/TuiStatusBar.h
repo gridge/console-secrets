@@ -11,11 +11,13 @@
 #ifndef __TUISTATUSBAR__
 #define __TUISTATUSBAR__
 
+#include <cstdlib>
+#include <vector>
+#include <string>
+
 #include "IErrorHandler.h"
 #include "ITuiPage.h"
 
-#include <vector>
-#include <string>
 
 /** Text User Interface status bar, command bar and header management.
  */

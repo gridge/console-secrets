@@ -11,6 +11,7 @@
 #ifndef __ITUIPAGE__
 #define __ITUIPAGE__
 
+#include <cstdlib>
 #include "IErrorHandler.h"
 
 //forward declarations

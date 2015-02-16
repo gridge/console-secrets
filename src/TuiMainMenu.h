@@ -11,9 +11,11 @@
 #ifndef __TUIMAINMENU__
 #define __TUIMAINMENU__
 
+#include <cstdlib>
+#include <vector>
+
 #include "ITuiPage.h"
 
-#include <vector>
 
 /** Implements main menu page.
  */

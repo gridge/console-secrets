@@ -39,7 +39,7 @@ class IErrorHandler {
   std::string m_name; ///< Name of service/tool
  public:
   IErrorHandler(std::string pName);
-  ~IErrorHandler();
+  virtual ~IErrorHandler();
 
   /// Return and clear Error Message
   StatusCode GetErrorMsg(std::string &pMsg);

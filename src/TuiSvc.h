@@ -11,15 +11,16 @@
 #ifndef __TUI_SERVICE__
 #define __TUI_SERVICE__
 
+#include <cstdlib>
+#include <string>
+#include <vector>
+
 #include "IErrorHandler.h"
 #include "SourceURI.h"
 #include "ITuiPage.h"
 #include "TuiStatusBar.h"
 #include "TuiMainMenu.h"
 #include "TuiAccount.h"
-
-#include <string>
-#include <vector>
 
 /** Text User Interface Service.
  * Implements a simple text-based user interface.
