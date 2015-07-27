@@ -71,6 +71,9 @@ class TuiAccount : public ITuiPage {
   int m_cfgFieldNameWidth;
 
 
+  /// Fill fields for command bar
+  void SetCommandBar();
+
  public:
 
   // ----------------------------------------
@@ -119,6 +122,8 @@ class TuiAccount : public ITuiPage {
    * To be called before invoking TuiAccount::Display(), it allows fields to be modified
    */
   virtual StatusCode UnlockFields();
+  /** Query if fields are locked. */
+  bool IsFieldsLocked();
 
   /** Set an offset for window displaying.
    * Set a row/column offset for the upper-left corner of the window displaying the account information.

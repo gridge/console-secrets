@@ -98,6 +98,12 @@ class MultipleSourceIOSvc : public IIOService {
    */
   virtual ARecord* FindByAccountId(unsigned long pAccountId);
 
+  /** @copydoc IIOService::GetAllAccounts() 
+      Loop over existing sources and return a new vector with their complete list.
+   */
+  virtual std::vector<ARecord*> GetAllAccounts();
+  
+
   /** @copydoc IIOService::GetLabels()
    * Loop over existing sources and build a global label list.
    */

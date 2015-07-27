@@ -433,6 +433,11 @@ vector<ARecord*> SingleSourceIOSvc::FindByLabel(std::string pSearch, SearchReque
 
 ARecord* SingleSourceIOSvc::FindByAccountId(unsigned long pAccountId)
 {
+  if ((m_data.size() == 0) && !m_source.GetURI().empty()) {
+    //try to load source first
+    log->say(ILog::WARNING, string("Data empty. Trying to load from source: ") + m_source.GetURI());
+    Load();
+  }
   for (vector<ARecord*>::iterator itr = m_data.begin(); itr != m_data.end(); ++itr) {
     if ((*itr)->GetAccountId() == pAccountId) {
       // record found. Assume no duplicates
@@ -442,6 +447,16 @@ ARecord* SingleSourceIOSvc::FindByAccountId(unsigned long pAccountId)
   //record not found
   *log << ILog::WARNING << "Record not found. AccountId = " << pAccountId << this << ILog::endmsg;
   return 0; // return null pointer
+}
+
+vector<ARecord*> SingleSourceIOSvc::GetAllAccounts()
+{
+  if ((m_data.size() == 0) && !m_source.GetURI().empty()) {
+    //try to load source first
+    log->say(ILog::WARNING, string("Data empty. Trying to load from source: ") + m_source.GetURI());
+    Load();
+  }
+  return m_data;
 }
 
 vector<string> SingleSourceIOSvc::GetLabels()

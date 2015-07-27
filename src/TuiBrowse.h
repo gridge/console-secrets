@@ -22,7 +22,20 @@ class TuiBrowse : public ITuiPage {
   // ----------------------------------------
   // --- Internal members
   // ----------------------------------------  
-  TuiAccount *m_editAccountPage;  
+  /// Flag to edit accounts on the same page or a new one
+  TuiAccount *m_editAccountPage;
+
+  /// Update current list of records 
+  StatusCode UpdateListRecords(std::vector<ARecord*> &newList);
+
+  /// Set command bar default navigation commands
+  void SetCommandBarNavigation();
+
+  /// Display record for viewing or editing
+  void ViewRecord(ARecord *record);
+
+  /// Remove record
+  void RemoveRecord(ARecord *record);
   
   // ----------------------------------------
   // --- ncurses objects
@@ -39,11 +52,16 @@ class TuiBrowse : public ITuiPage {
   // ----------------------------------------  
   /// Number of lines for the browsing window
   int m_nLinesForBrowsing; 
+  /// Number of colimns for displaying each item
+  int m_nColsPerItem;
   /// Edit or view record in new screen
   bool m_editInNewPage;
 
-  ///List of menu items as strings
-  std::vector<std::string> m_loaListStr;
+  ///List of currently displayed records
+  std::vector<ARecord*> m_listOfRecords;
+
+  ///Labels for menu display
+  std::vector<std::pair<std::string,std::string> > m_loaLabels;
 
  public:
 
@@ -75,7 +93,12 @@ class TuiBrowse : public ITuiPage {
   // ----------------------------------------  
   // --- Accessors
   // ----------------------------------------  
+
+  /// Number of lines for the browsing window
   void SetNLinesForBrowsing(int pNLines);
+
+  /// Number of colimns for displaying each item
+  void SetNColumnsPerItem(int pNCols);
 
   //@TODO Allow filtering of items
 

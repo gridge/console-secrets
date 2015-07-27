@@ -32,11 +32,11 @@ See below for a complete list of features currently implemented.
 -------------
 * a) Requirements.
 In order to work we need the following libraries/programs installed:
-gnupg, gnupg-agent, gpgme, ncurses, pinentry-curses (optional)
+gnupg, gnupg-agent, gpgme, ncurses, cdk5, pinentry-curses (optional)
 
 On an Ubuntu 12.04 system, for example, type:
 $ sudo apt-get install gnupg2 gnupg-agent libgpgme11 libgpgme11-dev libncurses5 \
-libncurses5-dev pinentry-curses
+libncurses5-dev pinentry-curses libcdk5 libcdk5-dev
 
 * b) Get source code of console-secrets and compile it.
 The source can be downloaded from GitHub:

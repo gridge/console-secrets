@@ -21,6 +21,7 @@
 #include "TuiStatusBar.h"
 #include "TuiMainMenu.h"
 #include "TuiAccount.h"
+#include "TuiBrowse.h"
 
 /** Text User Interface Service.
  * Implements a simple text-based user interface.
@@ -61,6 +62,9 @@ class TuiSvc : public IErrorHandler {
   void NewAccount();
 
   // -- Browse page
+  TuiBrowse *m_browsingPage;
+  /** Display brose accounts page. */
+  void BrowseAccounts();
 
   // -- Search page
 

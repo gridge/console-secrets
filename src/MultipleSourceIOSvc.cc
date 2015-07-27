@@ -305,6 +305,18 @@ ARecord* MultipleSourceIOSvc::FindByAccountId(unsigned long pAccountId)
   return cSrc->FindByAccountId(pAccountId);
 }
 
+vector<ARecord*> MultipleSourceIOSvc::GetAllAccounts()
+{
+  //Loop over all sources and append all recors one after the other
+  // No sorting is performed.
+  vector<ARecord*> fullRecordList;
+  for (vector<SingleSourceIOSvc*>::iterator its = m_sourceList.begin(); its != m_sourceList.end(); ++its) {
+    vector<ARecord*> recordsToAdd = (*its)->GetAllAccounts();
+    fullRecordList.insert(fullRecordList.end(), recordsToAdd.begin(), recordsToAdd.end());
+  }    
+  return fullRecordList;
+}
+
 vector<string> MultipleSourceIOSvc::GetLabels()
 {
   // loop over sources and build a global label list

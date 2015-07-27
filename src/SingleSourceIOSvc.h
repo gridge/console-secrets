@@ -78,6 +78,8 @@ class SingleSourceIOSvc : public IIOService {
   virtual std::vector<ARecord*> FindByLabel(std::string pSearch, SearchRequest::SearchType pTypeOfSearch=SearchRequest::TXT);    
   /// @copydoc IIOService::FindByAccountId()
   virtual ARecord* FindByAccountId(unsigned long pAccountId);  
+  /// @copydoc IIOService::GetAllAccounts()
+  virtual std::vector<ARecord*> GetAllAccounts();
 
   /** @copydoc IIOService::GetLabels()
    * Loop over all elements to find out which are defined labels.

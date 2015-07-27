@@ -126,17 +126,28 @@ IErrorHandler::StatusCode TuiAccount::Init(TuiStatusBar *pStatusBar)
   *log << ILog::DEBUG << "Created field window: " 
        << "H:" << m_wnd_lines << " W:" << m_wnd_cols << " Y:" << m_wnd_y << " X:" << m_wnd_x << this << ILog::endmsg;
 
-  // command bar
+  return m_statusCode;
+}
+
+void TuiAccount::SetCommandBar()
+{
   m_commands.clear();
-  m_commands.push_back(make_pair<string, string>("^X","Save account"));
-  m_commands.push_back(make_pair<string, string>("^C","Cancel editing"));
-  m_commands.push_back(make_pair<string, string>("^N", "New field"));
-  m_commands.push_back(make_pair<string, string>("^R", "Remove field"));
-  m_commands.push_back(make_pair<string, string>("^F", "Quick-add fields"));
+  if (m_fieldsLocked) {
+    m_commands.push_back(make_pair<string, string>("^C","Exit viewer"));
+    m_commands.push_back(make_pair<string, string>("^X","Edit item"));    
+  } else {
+    //edit mode
+    m_commands.push_back(make_pair<string, string>("^X","Save account"));
+    m_commands.push_back(make_pair<string, string>("^C","Cancel editing"));
+    m_commands.push_back(make_pair<string, string>("^N", "New field"));
+    m_commands.push_back(make_pair<string, string>("^R", "Remove field"));
+    m_commands.push_back(make_pair<string, string>("^F", "Quick-add fields"));
+  }
   //  m_commands.push_back(make_pair<string, string>("^K", "Cut line"));
   //  m_commands.push_back(make_pair<string, string>("^U", "Un-cut line"));
 
-  return m_statusCode;
+  //update command-bar
+  m_statusBar->CommandBar(m_commands);
 }
 
 IErrorHandler::StatusCode TuiAccount::Close()
@@ -162,11 +173,9 @@ IErrorHandler::StatusCode TuiAccount::Display()
   
   // --- clear screen, set status to running
   ITuiPage::Display(); 
-  if (!m_fieldsLocked) {
-    m_statusBar->HeaderBar("ACCOUNT DETAILS");    
-    m_statusBar->StatusBar(); // clear status bar
-    m_statusBar->CommandBar(m_commands);
-  }
+  m_statusBar->HeaderBar("ACCOUNT DETAILS");    
+  m_statusBar->StatusBar(); // clear status bar
+  SetCommandBar();
 
   if (!m_record) {
     // it should never happen
@@ -223,19 +232,23 @@ IErrorHandler::StatusCode TuiAccount::Display()
     case CTRL('?'):
     case CTRL('h'):
     case 127: //XFree 4 style
+      if (m_fieldsLocked) break; //no action if record is locked
       form_driver(m_accountForm, REQ_DEL_PREV);      
       break;
     case CTRL('d'):
     case KEY_DC:
+      if (m_fieldsLocked) break; //no action if record is locked
       form_driver(m_accountForm, REQ_DEL_CHAR);      
       break;
     case CTRL('k'):
+      if (m_fieldsLocked) break; //no action if record is locked
       //TODO: implement cut into a buffer and the paste back (does not work in the middle of words!)
       cutPasteBuffer=TrimStr( static_cast<char*>( field_buffer (m_accountFields[fieldSelected], 0) ) );
       *log << ILog::DEBUG << "Cutting: " << cutPasteBuffer << ILog::endmsg;
       form_driver(m_accountForm, REQ_CLR_EOF);      
       break;
     case CTRL('y'):
+      if (m_fieldsLocked) break; //no action if record is locked
       //paste content
       *log << ILog::DEBUG << "Pasting: " << cutPasteBuffer << ILog::endmsg;
       for (string::iterator itc = cutPasteBuffer.begin(); itc != cutPasteBuffer.end(); ++itc)
@@ -251,6 +264,7 @@ IErrorHandler::StatusCode TuiAccount::Display()
       // Special actions
     case CTRL('r'):
       {
+	if (m_fieldsLocked) break; //no action if record is locked
 	//remove field
 	// if not field selected, exit
 	int selF = field_index(current_field(m_accountForm));
@@ -281,6 +295,7 @@ IErrorHandler::StatusCode TuiAccount::Display()
       }
     case CTRL('n'):
       {
+	if (m_fieldsLocked) break; //no action if record is locked
 	//create new field
 	//syncronize forms<->record
 	UpdateAndFreeForm();
@@ -302,6 +317,7 @@ IErrorHandler::StatusCode TuiAccount::Display()
       }
     case CTRL('f'):
       {
+	if (m_fieldsLocked) break; //no action if record is locked
 	// Add set of pre-defined fields
         ARecord accountType = SelectPredefAccType(false);// not empty record
 	if (m_statusCode >= SC_ERROR)
@@ -327,6 +343,7 @@ IErrorHandler::StatusCode TuiAccount::Display()
 	  break;
 	}	
 	int labToAdd = SelectOne("Select label", labelList);
+	if (m_fieldsLocked) break; //no action if record is locked
 	if (labToAdd >= 0) {
 	  //move to the end of the field
 	  form_driver(m_accountForm, REQ_END_FIELD);	  
@@ -346,6 +363,7 @@ IErrorHandler::StatusCode TuiAccount::Display()
 	// Ask for user using SelectOne() function
 	int fieldToAdd;
 	fieldToAdd = SelectOne("Select field", m_record->GetFieldNameList()); 	
+	if (m_fieldsLocked) break; //no action if record is locked
 	//- got it, add the answer to the field emulating user input (useful for dynamic size of fields)
 	if (fieldToAdd >= 0) {
 	  //move to the end of the field
@@ -365,18 +383,28 @@ IErrorHandler::StatusCode TuiAccount::Display()
       // Quit account editing
     case CTRL('c'):
       // TODO: ask for confirmation with statusbar
-      *log << ILog::INFO << "Account editing cancelled." << this << ILog::endmsg;
+      if (m_fieldsLocked)
+	*log << ILog::INFO << "Exiting account viewer." << this << ILog::endmsg;
+      else
+	*log << ILog::INFO << "Account editing cancelled." << this << ILog::endmsg;
       m_statusCode = SC_ABORT;
       quitAccount = true;
       break;
     case CTRL('x'):
-      // TODO: ask for confirmation with statusbar
-      m_statusCode = SC_OK;
-      quitAccount = true;
+      if (m_fieldsLocked) {
+	//fields locked: go in edit mode
+	UnlockFields();
+	SetCommandBar(); //update command bar
+      } else {
+	// fields unlocked: save record and quit
+	// TODO: ask for confirmation with statusbar
+	m_statusCode = SC_OK;
+	quitAccount = true;
+      }
       break;
-
       // Default: pass to driver
     default:
+      if (m_fieldsLocked) break; //no action if record is locked
       form_driver(m_accountForm, ch);
       break;
 
@@ -384,7 +412,7 @@ IErrorHandler::StatusCode TuiAccount::Display()
 
     // handle special actions at field change
     int newFieldSelected = field_index(current_field(m_accountForm));
-    if (newFieldSelected != fieldSelected) {
+    if ((newFieldSelected != fieldSelected) and (not m_fieldsLocked)) {
       //actions when exiting a field
       if (fieldSelected == fEssentialsIdx) {
 	//validate input
@@ -419,13 +447,14 @@ IErrorHandler::StatusCode TuiAccount::Display()
 	//restore (even if not always necessary) usual command bar
 	m_statusBar->CommandBar(m_commands);
       }
-      fieldSelected = newFieldSelected; //store new selected field
     }
+    fieldSelected = newFieldSelected; //store new selected field
     
   } // end loop for input key
 
   // --- check if fields have changed, and update m_record accordingly
-  UpdateAndFreeForm(); //updated m_record and frees memory (if a form is available)    
+  if (m_statusCode < SC_ERROR)
+    UpdateAndFreeForm(); //updated m_record and frees memory (if a form is available)    
 
   // --- all done
 
@@ -444,6 +473,11 @@ IErrorHandler::StatusCode TuiAccount::UnlockFields()
 {
   m_fieldsLocked = false;
   return SC_OK;
+}
+
+bool TuiAccount::IsFieldsLocked()
+{
+  return m_fieldsLocked;
 }
 
 IErrorHandler::StatusCode TuiAccount::NewAccount()
@@ -1092,8 +1126,11 @@ void TuiAccount::UpdateAndFreeForm()
   if (!m_accountForm || !m_accountFields)
     return;
 
+  if (m_fieldsLocked) return; //no action needed, account locked
+
   //update m_record looping over all fields
-  // we access members directly, this partially by-pass the initial temptative of LOCK feature
+  // we access members directly, this partially by-pass the initial temptative of LOCK feature, such that is
+  // ensured only by the logic here.
   // Call this function with the same structure of fields in the record and the form (should always be) or 
   // results can be not quite right in some peculiar cases of multiple same-name fields added/deleted.
   *log << ILog::DEBUG << "Updating m_record." << this << ILog::endmsg;

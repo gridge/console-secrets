@@ -121,6 +121,9 @@ class IIOService : public IErrorHandler {
    */
   virtual ARecord* FindByAccountId(unsigned long pAccountId) = 0;
 
+  /** Retrieve all accounts. */
+  virtual std::vector<ARecord*> GetAllAccounts() = 0;
+
   /** Retrieve all labels list.
    */
   virtual std::vector<std::string> GetLabels() = 0;

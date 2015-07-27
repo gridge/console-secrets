@@ -30,6 +30,7 @@ TuiSvc::TuiSvc(string pName) : IErrorHandler(pName)
   m_statusBar = 0;
   m_mainMenuPage = 0;
   m_newAccountPage = 0;
+  m_browsingPage = 0;
 }
 
 TuiSvc::~TuiSvc()
@@ -138,7 +139,8 @@ void TuiSvc::MainMenu()
       NewAccount();
       break;
     case TuiMainMenu::BROWSE:
-      m_statusBar->StatusBar("Browse not implemented yet. Sorry.");
+      m_mainMenuPage->Close();
+      BrowseAccounts();
       break;
     case TuiMainMenu::SEARCH:
       m_statusBar->StatusBar("Search not implemented yet. Sorry.");
@@ -207,6 +209,31 @@ void TuiSvc::NewAccount()
   //delete and quit
   delete m_newAccountPage;
   m_newAccountPage = 0;
+}
+
+void TuiSvc::BrowseAccounts()
+{
+  if (m_browsingPage)
+    delete m_browsingPage;
+
+  m_browsingPage = new TuiBrowse("TuiBrowse");
+  m_statusCode = m_browsingPage->Init(m_statusBar);
+  if (m_statusCode >= SC_ERROR) {
+    delete m_browsingPage;
+    m_browsingPage = 0;
+    return;
+  }  
+
+  //Launch browsing window
+  m_browsingPage->Display();
+
+  //catch errors
+  m_statusCode = m_browsingPage->GetErrorMsg(m_errorMsg);
+
+  m_browsingPage->Kill();
+
+  delete m_browsingPage;  
+  m_browsingPage = 0;
 }
 
 // ----------------------------------------
