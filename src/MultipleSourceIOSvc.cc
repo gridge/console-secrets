@@ -338,10 +338,11 @@ IErrorHandler::StatusCode MultipleSourceIOSvc::Remove(unsigned long pAccountId)
 {
   string cSource;
   cSource = m_idManagerTool->GetSource(pAccountId);
+  *log << ILog::DEBUG << "Got source for account Id " << pAccountId << ":" << cSource << this << ILog::endmsg;
   SingleSourceIOSvc *cSrc;
   cSrc = GetSingleSource(cSource);
   if (!cSrc) {
-    *log << ILog::ERROR << "Record not found. Accout id = " << pAccountId
+    *log << ILog::ERROR << "Record not found. Account id = " << pAccountId
 	 << this << ILog::endmsg;
     return SC_NOT_FOUND;
   } 

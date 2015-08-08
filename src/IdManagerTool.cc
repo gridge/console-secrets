@@ -30,7 +30,10 @@ unsigned long IdManagerTool::GetNewId(std::string pSource)
   // for now use plain incremental Ids, start from 1.
   unsigned long newId=0; //zero is reserved, and indicates an error
   newId = m_idData.size()+1;
-  m_idData[newId-1] = pSource;
+  m_idData[newId] = pSource;
+
+  *log << ILog::DEBUG << "New Id requested: " << newId << " for source: " << pSource << this << ILog::endmsg;
+
   return newId;
 }
 
@@ -38,9 +41,18 @@ string IdManagerTool::GetSource(unsigned long pId)
 {
   string pS;
   idDataType::iterator idx = m_idData.find(pId);
+
+  //debug
+  *log << ILog::DEBUG << "List of accounts in Id Manager." << this << ILog::endmsg;
+  for (idDataType::iterator itId = m_idData.begin(); itId != m_idData.end(); ++itId) {
+    *log << ILog::DEBUG << itId->first << " - " << itId->second << this << ILog::endmsg;
+  }
+
+
   if (idx != m_idData.end()) {
     //found
     pS = idx->second;
+    *log << ILog::DEBUG << "Requested source for Id: " << pId << ". Found it: " << pS << this << ILog::endmsg;
   }
   return pS;
 }

@@ -483,11 +483,12 @@ IErrorHandler::StatusCode SingleSourceIOSvc::Remove(unsigned long pAccountId)
   for (vector<ARecord*>::iterator itr = m_data.begin(); itr != m_data.end(); ++itr) {
     if ((*itr)->GetAccountId() == pAccountId) {
       //print warning
-      *log << ILog::WARNING << "Removing record with accountId = " << pAccountId << this << ILog::endmsg;
-      if (record_found) 
-	*log << ILog::ERROR << "Duplicate record found!!! accountId = " << pAccountId << this << ILog::endmsg;
-      //remove this record
+      *log << ILog::INFO << "Removing record with accountId = " << pAccountId << this << ILog::endmsg;
+      //remove this record and free its Id
       m_data.erase(itr);
+      m_idManagerTool->FreeId(pAccountId);
+      record_found = true;
+      break;
     }
   }
   if (!record_found) {

@@ -208,8 +208,8 @@ IErrorHandler::StatusCode TuiBrowse::Display()
     default:
       //assume it's a search character
       if (c < 255) {
-	*log << ILog::VERBOSE << "Add to search buffer: " << c << this << ILog::endmsg;
-	menu_driver(m_loaMenu, c);
+	*log << ILog::VERBOSE << "Add to search buffer: " << (char)c << this << ILog::endmsg;
+	menu_driver(m_loaMenu, (char)c);
       }
     }
     wrefresh(m_wnd);
@@ -335,16 +335,16 @@ void TuiBrowse::RemoveRecord(ARecord *record)
       m_statusBar->StatusBar("ERROR removing record. Aborting removal.");
       return;
     }
-    m_statusCode = ioSvc->Store(); //flush to disk
-    if (m_statusCode >= SC_ERROR) {
-      m_statusBar->StatusBar("ERROR saving to file. Removal may have failed.");
-    }
     //print confirmation and update current list of records
     if (m_statusCode < SC_ERROR) m_statusBar->StatusBar(string("Removed record: ")+nameOfRemoved);
     vector<ARecord*> newListRecords = ioSvc->GetAllAccounts();
     UpdateListRecords(newListRecords);
+    post_menu(m_loaMenu);
+    //refresh screen
+    wrefresh(m_wnd);  
   } else {
     m_statusBar->StatusBar("Removal CANCELLED.");
   }  
+  SetCommandBarNavigation();
 }
 

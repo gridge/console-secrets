@@ -77,6 +77,7 @@ IErrorHandler::StatusCode IIOService::Add(vector<ARecord*> pARecords, bool flush
 IErrorHandler::StatusCode IIOService::Remove(ARecord *pRecord)
 {
   //just call the method Remove(unsigned long pAccountId)
+  *log << ILog::DEBUG << "Requested remove of record with account Id: " << pRecord->GetAccountId() << this << ILog::endmsg;
   return Remove(pRecord->GetAccountId());
 }
 
