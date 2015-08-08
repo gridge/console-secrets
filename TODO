@@ -1,6 +1,7 @@
 === Currently working on ===
 == TuiBrowse
-- Removal of records does not work properly (not saved to disk, new list is blank)
+- Search for records does not filter properly
+- Need implementing ordering by date/name
 
 == TuiAccount
 - After going to edit-mode, I can't seem to change anything. ARecord fields seem locked, how to unlock? (protected member for now. Who is locking them?)
