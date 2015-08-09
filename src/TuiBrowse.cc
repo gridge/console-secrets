@@ -313,8 +313,26 @@ void TuiBrowse::ViewRecord(ARecord *record)
 
   //check if account was modified simply looking if fields are still locked
   if (not m_editAccountPage->IsFieldsLocked()) {
-    //record was passed by pointer, so it's up-to-date, need to trigger writing to disk though
-    m_statusCode = ioSvc->Store();
+    m_statusCode = m_editAccountPage->GetErrorMsg(m_errorMsg);
+    if (m_statusCode < SC_ERROR) {
+      //record was passed by pointer, so it's up-to-date, need to trigger writing to disk though
+      m_statusCode = ioSvc->Store();
+      if (m_statusCode >= SC_ERROR) {
+	*log << ILog::INFO << "Error saving changes." << this << ILog::endmsg;
+	m_statusBar->StatusBar("ERROR saving changes. Changes likely not saved.");
+      } else {
+	*log << ILog::INFO << "Saved changes to record." << this << ILog::endmsg;
+	m_statusBar->StatusBar("Successfully saved changes.");
+      }
+    } else if (m_statusCode == SC_ABORT) {
+      *log << ILog::INFO << "Aborting editing of account." << this << ILog::endmsg;
+      m_statusBar->StatusBar("Account editing aborted. Changes were not saved.");
+    } else {
+      //error
+      *log << ILog::INFO << "Error editing of account." << this << ILog::endmsg;
+      m_statusBar->StatusBar("ERROR in editing account. Changes were not saved.");      
+    }
+
   }
   
   //restore command bar, clean window

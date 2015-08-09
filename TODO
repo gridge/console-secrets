@@ -4,4 +4,5 @@
 - Need implementing ordering by date/name
 
 == TuiAccount
-- After going to edit-mode, I can't seem to change anything. ARecord fields seem locked, how to unlock? (protected member for now. Who is locking them?)
+- When editing one record from viewing, the field that is selected does not get unlocked (the others do)
+

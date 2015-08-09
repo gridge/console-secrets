@@ -466,12 +466,27 @@ IErrorHandler::StatusCode TuiAccount::Display()
 IErrorHandler::StatusCode TuiAccount::LockFields()
 {
   m_fieldsLocked = true;
+  //lock field content
+  if (m_accountFields) {
+    int totfields = m_numberFieldsAccProp + m_record->GetNumberOfFields(); 
+    for (int idf = 0; idf < totfields; ++idf) {
+      field_opts_off(m_accountFields[idf], O_EDIT);
+    }
+  }
+  m_record->SetLock(ARecord::LOCKED);
   return SC_OK;
 }
 
 IErrorHandler::StatusCode TuiAccount::UnlockFields()
 {
   m_fieldsLocked = false;
+  if (m_accountFields) {
+    int totfields = m_numberFieldsAccProp + m_record->GetNumberOfFields(); 
+    for (int idf = 0; idf < totfields; ++idf) {
+      field_opts_on(m_accountFields[idf], O_EDIT);
+    }
+  }
+  m_record->SetLock(ARecord::UNLOCKED);
   return SC_OK;
 }
 
@@ -1176,8 +1191,9 @@ void TuiAccount::UpdateAndFreeForm()
       ++recordField;
     }
   } // loop over fields
-  *log << ILog::DEBUG << "m_record updated." << this << ILog::endmsg;
 
+  *log << ILog::DEBUG << "m_record updated." << this << ILog::endmsg;
+  m_record->SetLock(ARecord::LOCKED);
   //unpost form
   unpost_form(m_accountForm);
   //free memory

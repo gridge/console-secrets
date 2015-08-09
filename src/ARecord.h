@@ -56,12 +56,11 @@ class ARecord {
  protected:
   /// Control il object data are locked and cannot be modified
   LockStatus m_lock;
-  /** Set specific lock status. 
-   * Only private members and IIOService classes can call it.
-   */
-  LockStatus SetLock(LockStatus pLock);
 
  public:
+  /** Set specific lock status. */
+  LockStatus SetLock(LockStatus pLock);
+
   /// Check lock status
   LockStatus GetLockStatus();
 
