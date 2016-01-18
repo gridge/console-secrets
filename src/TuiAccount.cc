@@ -115,14 +115,14 @@ IErrorHandler::StatusCode TuiAccount::Init(TuiStatusBar *pStatusBar)
   }
 
   // main window
-  m_wnd_lines = LINES - (m_statusBar->GetHeaderHeight() + m_statusBar->GetBottomBarHeight() + 2) - m_rowOffset;
+  m_wnd_lines = LINES - (m_statusBar->GetHeaderHeight() + m_statusBar->GetBottomBarHeight()) - m_rowOffset; 
   m_wnd_cols = COLS - m_colOffset;
-  m_wnd_y = m_statusBar->GetHeaderHeight()+1+m_rowOffset;
+  m_wnd_y = m_statusBar->GetHeaderHeight()+m_rowOffset;
   m_wnd_x = m_colOffset; 
   m_wnd = newwin(m_wnd_lines, m_wnd_cols, m_wnd_y, m_wnd_x);
   keypad(m_wnd, TRUE);
   // field window (whole main window)
-  m_accountFieldWnd = subwin(m_wnd, m_wnd_lines, m_wnd_cols, m_wnd_y, m_wnd_x+1); //leave one column for space/border
+  m_accountFieldWnd = subwin(m_wnd, m_wnd_lines, m_wnd_cols, m_wnd_y, m_wnd_x); //leave one column for space/border
   *log << ILog::DEBUG << "Created field window: " 
        << "H:" << m_wnd_lines << " W:" << m_wnd_cols << " Y:" << m_wnd_y << " X:" << m_wnd_x << this << ILog::endmsg;
 
@@ -1162,8 +1162,8 @@ void TuiAccount::UpdateAndFreeForm()
     if (field_status(m_accountFields[idx]) != 0) 
       fieldChanged=true;
     if (fieldChanged) {
-      *log << ILog::DEBUG << "Field " << idx << ": '" << title << "' changed. Saving: '" 
-	   << content << "'" << this << ILog::endmsg;
+      *log << ILog::DEBUG << "Field " << idx << ": '" << title << "' changed. Saving." 
+	   << this << ILog::endmsg;
     }
     if (index == fNameIdx) { //Account name
       m_record->SetAccountName( content );

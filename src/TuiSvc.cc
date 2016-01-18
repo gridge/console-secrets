@@ -84,7 +84,7 @@ IErrorHandler::StatusCode TuiSvc::InitTui()
   //refresh all the screen
   refresh();
 
-  //store screen properties
+  //store initial screen properties
   getmaxyx(m_mwnd, m_screenRows, m_screenColumns);
 
   *log << ILog::VERBOSE << "Initialized screen with " << LINES << " lines and "
@@ -100,8 +100,10 @@ IErrorHandler::StatusCode TuiSvc::CloseTui()
   //delete status bar
   delete m_statusBar;
   //end main window
-  if (endwin() != OK)
+  if (endwin() != OK) {
+    *log << ILog::ERROR << "Error in closing main window" << this << ILog::endmsg;
     return SC_ERROR;
+  }
 
   m_mwnd = 0;
 

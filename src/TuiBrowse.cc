@@ -85,11 +85,13 @@ IErrorHandler::StatusCode TuiBrowse::Init(TuiStatusBar *pStatusBar)
     return m_statusCode;
   }
 
+
   return m_statusCode;
 }
 
 IErrorHandler::StatusCode TuiBrowse::Close()
 { 
+  if (m_loaMenu) unpost_menu(m_loaMenu);
   return ITuiPage::Close();
 }
 
@@ -114,6 +116,12 @@ IErrorHandler::StatusCode TuiBrowse::Kill()
   m_loaList = 0;
   m_loaMenu = 0;
 
+  if (m_editAccountPage) {
+    m_editAccountPage->Kill();
+    delete m_editAccountPage;
+    m_editAccountPage = 0;
+  }
+
   return ITuiPage::Kill();
 
 }
@@ -123,6 +131,7 @@ IErrorHandler::StatusCode TuiBrowse::Display()
   m_statusCode = SC_OK;
 
   if (Status() != RUNNING) {
+    *log << ILog::DEBUG << "Refreshing window (coming from not RUNNING state" << ILog::endmsg;
     //Need to refresh few things
     ITuiPage::Display();
     //display header, command bar. Do not clean status-bar now (keep last message)
@@ -131,7 +140,8 @@ IErrorHandler::StatusCode TuiBrowse::Display()
     //draw the main menu
     post_menu(m_loaMenu);
     //refresh screen
-    wrefresh(m_wnd);  
+    wrefresh(m_wnd);
+    wrefresh(m_loaWnd);
   }
 
   set_current_item(m_loaMenu, m_loaList[0]);
@@ -258,10 +268,25 @@ IErrorHandler::StatusCode TuiBrowse::UpdateListRecords(vector<ARecord*> &newList
   // format of items: ModificationDate, AccountName
   m_listOfRecords = newList;
   m_loaList = new ITEM*[m_listOfRecords.size()+1];
+  *log << ILog::DEBUG << "Updating list of record. New size = " << m_listOfRecords.size() << ILog::endmsg;
   for (unsigned int idxR = 0; idxR < m_listOfRecords.size(); ++idxR) {
     m_loaLabels.push_back(make_pair(m_listOfRecords[idxR]->GetModificationTimeStr(),
 				    m_listOfRecords[idxR]->GetAccountName()));
-    m_loaList[idxR] = new_item(m_loaLabels[idxR].first.c_str(),m_loaLabels[idxR].second.c_str());
+
+    size_t size = m_loaLabels[idxR].first.size()+1;
+    if (size > 256) size = 256;
+    char *label_time = new char[size];
+    strncpy(label_time, m_loaLabels[idxR].first.c_str(), size);
+    if (size == 256) label_time[255] = '\x0';
+    size = m_loaLabels[idxR].second.size()+1;
+    if (size > 256) size = 256;
+    char *label_name = new char[size];
+    strncpy(label_name, m_loaLabels[idxR].second.c_str(), size);
+    if (size == 256) label_time[255] = '\x0'; //ensure null-terminated in case of overflow string
+    //m_loaList[idxR] = new_item(m_loaLabels[idxR].first.c_str(),m_loaLabels[idxR].second.c_str());
+    m_loaList[idxR] = new_item(label_time, label_name);
+    *log << ILog::DEBUG << "Adding to menu. " << (unsigned long)idxR << ": " //<< m_listOfRecords[idxR]->GetAccountName() << ILog::endmsg;
+	 << m_loaLabels[idxR].second.c_str() << "(" << m_loaLabels[idxR].first.c_str() << ")" << ILog::endmsg;
   }
   m_loaList[m_listOfRecords.size()] = new_item(NULL,NULL); //end-of-array
   m_loaMenu = new_menu((ITEM**)m_loaList);

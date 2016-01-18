@@ -48,6 +48,8 @@ SingleSourceIOSvc::~SingleSourceIOSvc()
     delete m_formatterTool;
   if (m_securityTool)
     delete m_securityTool;
+  if (m_idManagerTool)
+    delete m_idManagerTool;
 }
 
 IErrorHandler::StatusCode SingleSourceIOSvc::LoadTools()

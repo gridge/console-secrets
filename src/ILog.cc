@@ -30,7 +30,7 @@ void ILog::InitValues()
   m_msgTypeStr[INFO] = "INFO";
   m_msgTypeStr[VERBOSE] = "VERBOSE";
   m_msgTypeStr[DEBUG] = "DEBUG";
-  // default: mute log messages. None displayed
+  // default verbosity
   Mute();
 
   //internal usage
@@ -51,7 +51,7 @@ void ILog::Init()
 IErrorHandler::StatusCode ILog::SetLogDetail(ILogMsgType pLogDetail)
 {
   //check boundaries, 'endmsg' is allowed as no-logging
-  if (pLogDetail >= -1 && pLogDetail < endmsg) {
+  if (pLogDetail >= -1 && pLogDetail <= endmsg) {
     m_logDetail = pLogDetail;
     return SC_OK;
   }

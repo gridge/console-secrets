@@ -28,7 +28,8 @@ MultipleSourceIOSvc::MultipleSourceIOSvc(std::string pName) : IIOService(pName)
 
 MultipleSourceIOSvc::~MultipleSourceIOSvc()
 {
-
+  for (size_t idx=0; idx < m_sourceList.size(); idx++) 
+    delete m_sourceList[idx];
 }
 
 void MultipleSourceIOSvc::SetIdManagerTool(IdManagerTool *mTool)
