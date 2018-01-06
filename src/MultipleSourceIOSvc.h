@@ -101,7 +101,7 @@ class MultipleSourceIOSvc : public IIOService {
   /** @copydoc IIOService::GetAllAccounts() 
       Loop over existing sources and return a new vector with their complete list.
    */
-  virtual std::vector<ARecord*> GetAllAccounts();
+  virtual std::vector<ARecord*> GetAllAccounts(int sort);
   
 
   /** @copydoc IIOService::GetLabels()

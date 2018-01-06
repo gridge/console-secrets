@@ -451,14 +451,24 @@ ARecord* SingleSourceIOSvc::FindByAccountId(unsigned long pAccountId)
   return 0; // return null pointer
 }
 
-vector<ARecord*> SingleSourceIOSvc::GetAllAccounts()
+vector<ARecord*> SingleSourceIOSvc::GetAllAccounts(int sort)
 {
+  vector<ARecord*> listAccounts;
   if ((m_data.size() == 0) && !m_source.GetURI().empty()) {
     //try to load source first
     log->say(ILog::WARNING, string("Data empty. Trying to load from source: ") + m_source.GetURI());
     Load();
   }
-  return m_data;
+  listAccounts = m_data; //copy list of accounts, to enable sorting
+
+  //sort, if requested
+  if (sort == ACCOUNTS_SORT_BYNAME) {
+    std::sort(listAccounts.begin(), listAccounts.end(), sortByName);
+  } else if (sort == ACCOUNTS_SORT_BYDATE) {
+    std::sort(listAccounts.begin(), listAccounts.end(), sortByDate);
+  }
+
+  return listAccounts;
 }
 
 vector<string> SingleSourceIOSvc::GetLabels()
@@ -513,4 +523,14 @@ IErrorHandler::StatusCode SingleSourceIOSvc::SetSource(SourceURI pSource)
   }
   m_source = pSource;
   return m_statusCode = SC_OK;
+}
+
+bool SingleSourceIOSvc::sortByName(ARecord* a, ARecord* b)
+{
+  return (a->GetAccountName() < b->GetAccountName());
+}
+
+bool SingleSourceIOSvc::sortByDate(ARecord* a, ARecord* b)
+{
+  return (a->GetModificationTime() < b->GetModificationTime());
 }

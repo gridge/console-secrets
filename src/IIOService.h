@@ -42,6 +42,13 @@ class IIOService : public IErrorHandler {
   bool m_localIdMgrInstance;
 
  public:
+  enum AccountsSorting{
+    ACCOUNTS_SORT_NOSORT = 0,
+    ACCOUNTS_SORT_BYNAME = 1,
+    ACCOUNTS_SORT_BYDATE = 2
+  };
+
+ public:
   IIOService(std::string pName);
   IIOService(std::string pName, std::string owner);
   virtual ~IIOService();
@@ -121,8 +128,10 @@ class IIOService : public IErrorHandler {
    */
   virtual ARecord* FindByAccountId(unsigned long pAccountId) = 0;
 
-  /** Retrieve all accounts. */
-  virtual std::vector<ARecord*> GetAllAccounts() = 0;
+  /** Retrieve all accounts. 
+   * @param sort Sort accounts
+   */
+  virtual std::vector<ARecord*> GetAllAccounts(int sort=ACCOUNTS_SORT_NOSORT) = 0;
 
   /** Retrieve all labels list.
    */

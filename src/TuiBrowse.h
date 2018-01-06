@@ -56,6 +56,8 @@ class TuiBrowse : public ITuiPage {
   int m_nColsPerItem;
   /// Edit or view record in new screen
   bool m_editInNewPage;
+  /// Sorting of accounts for displaying
+  int m_sortingMode;
 
   ///List of currently displayed records
   std::vector<ARecord*> m_listOfRecords;

@@ -79,7 +79,7 @@ class SingleSourceIOSvc : public IIOService {
   /// @copydoc IIOService::FindByAccountId()
   virtual ARecord* FindByAccountId(unsigned long pAccountId);  
   /// @copydoc IIOService::GetAllAccounts()
-  virtual std::vector<ARecord*> GetAllAccounts();
+  virtual std::vector<ARecord*> GetAllAccounts(int sort);
 
   /** @copydoc IIOService::GetLabels()
    * Loop over all elements to find out which are defined labels.
@@ -96,6 +96,12 @@ class SingleSourceIOSvc : public IIOService {
    */
   virtual StatusCode SetSource(SourceURI pSource); ///< see m_source  
 
+ public:
+  /** Sorting function by account name. */
+  static bool sortByName(ARecord* a, ARecord* b);
+
+  /** Sorting function by modification date. */
+  static bool sortByDate(ARecord* a, ARecord* b);
   
 };
 

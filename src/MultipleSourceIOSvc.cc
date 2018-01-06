@@ -306,15 +306,23 @@ ARecord* MultipleSourceIOSvc::FindByAccountId(unsigned long pAccountId)
   return cSrc->FindByAccountId(pAccountId);
 }
 
-vector<ARecord*> MultipleSourceIOSvc::GetAllAccounts()
+vector<ARecord*> MultipleSourceIOSvc::GetAllAccounts(int sort)
 {
   //Loop over all sources and append all recors one after the other
   // No sorting is performed.
   vector<ARecord*> fullRecordList;
   for (vector<SingleSourceIOSvc*>::iterator its = m_sourceList.begin(); its != m_sourceList.end(); ++its) {
-    vector<ARecord*> recordsToAdd = (*its)->GetAllAccounts();
+    vector<ARecord*> recordsToAdd = (*its)->GetAllAccounts(sort);
     fullRecordList.insert(fullRecordList.end(), recordsToAdd.begin(), recordsToAdd.end());
   }    
+
+  //now sort them
+  if (sort == ACCOUNTS_SORT_BYNAME) {
+    std::sort(fullRecordList.begin(), fullRecordList.end(), SingleSourceIOSvc::sortByName);
+  } else if (sort == ACCOUNTS_SORT_BYDATE) {
+    std::sort(fullRecordList.begin(), fullRecordList.end(), SingleSourceIOSvc::sortByDate);
+  }  
+
   return fullRecordList;
 }
 

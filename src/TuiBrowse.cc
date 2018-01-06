@@ -34,6 +34,7 @@ TuiBrowse::TuiBrowse(std::string pName) : ITuiPage(pName)
   m_nLinesForBrowsing = static_cast<int>(LINES/2); // a bit more than half-screen
   m_nColsPerItem = 40;
   m_editInNewPage = false;
+  m_sortingMode = IIOService::ACCOUNTS_SORT_NOSORT;
 }
 
 TuiBrowse::~TuiBrowse()
@@ -69,7 +70,7 @@ IErrorHandler::StatusCode TuiBrowse::Init(TuiStatusBar *pStatusBar)
        << "H:" << m_wnd_lines << " W:" << m_wnd_cols << " Y:" << m_wnd_y << " X:" << m_wnd_x << this << ILog::endmsg;
 
   //now get the initial full list of items and build the menu
-  vector<ARecord*> allRecords = ioSvc->GetAllAccounts();
+  vector<ARecord*> allRecords = ioSvc->GetAllAccounts(m_sortingMode);
   UpdateListRecords(allRecords);
 
   //Set shortcuts for command-bar in navigation mode
@@ -191,9 +192,17 @@ IErrorHandler::StatusCode TuiBrowse::Display()
       menu_driver(m_loaMenu, REQ_BACK_PATTERN);
       break;
     case KEY_CANCEL:
-      //delete search pattern
-      menu_driver(m_loaMenu, REQ_CLEAR_PATTERN);
-      break;
+      {
+	//delete search pattern and sorting
+	menu_driver(m_loaMenu, REQ_CLEAR_PATTERN);
+	m_sortingMode = IIOService::ACCOUNTS_SORT_NOSORT;
+	vector<ARecord*> newListRecords = ioSvc->GetAllAccounts(m_sortingMode);
+	UpdateListRecords(newListRecords);
+	post_menu(m_loaMenu);
+	//refresh screen
+	wrefresh(m_wnd);
+	break;
+      }
     case CTRL('s'):
       //next search match
       menu_driver(m_loaMenu, REQ_NEXT_MATCH);
@@ -203,11 +212,25 @@ IErrorHandler::StatusCode TuiBrowse::Display()
       menu_driver(m_loaMenu, REQ_PREV_MATCH);
       break;
     case CTRL('n'):
-      m_statusBar->StatusBar("Not yet implemented");
-      break;
+      {
+	m_sortingMode = IIOService::ACCOUNTS_SORT_BYNAME;
+	vector<ARecord*> newListRecords = ioSvc->GetAllAccounts(m_sortingMode);
+	UpdateListRecords(newListRecords);
+	post_menu(m_loaMenu);
+	//refresh screen
+	wrefresh(m_wnd);        
+	break;
+      }
     case CTRL('d'):
-      m_statusBar->StatusBar("Not yet implemented");
-      break;
+      {
+	m_sortingMode = IIOService::ACCOUNTS_SORT_BYDATE;
+	vector<ARecord*> newListRecords = ioSvc->GetAllAccounts(m_sortingMode);
+	UpdateListRecords(newListRecords);
+	post_menu(m_loaMenu);
+	//refresh screen
+	wrefresh(m_wnd);
+	break;
+      }
     case CTRL('r'):
       {
 	ITEM *selItem = current_item(m_loaMenu);
@@ -380,7 +403,7 @@ void TuiBrowse::RemoveRecord(ARecord *record)
     }
     //print confirmation and update current list of records
     if (m_statusCode < SC_ERROR) m_statusBar->StatusBar(string("Removed record: ")+nameOfRemoved);
-    vector<ARecord*> newListRecords = ioSvc->GetAllAccounts();
+    vector<ARecord*> newListRecords = ioSvc->GetAllAccounts(m_sortingMode);
     UpdateListRecords(newListRecords);
     post_menu(m_loaMenu);
     //refresh screen
