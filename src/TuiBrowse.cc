@@ -291,7 +291,7 @@ IErrorHandler::StatusCode TuiBrowse::UpdateListRecords(vector<ARecord*> &newList
   // format of items: ModificationDate, AccountName
   m_listOfRecords = newList;
   m_loaList = new ITEM*[m_listOfRecords.size()+1];
-  *log << ILog::DEBUG << "Updating list of record. New size = " << m_listOfRecords.size() << ILog::endmsg;
+  *log << ILog::DEBUG << "Updating list of record. New size = " << (int)m_listOfRecords.size() << ILog::endmsg;
   for (unsigned int idxR = 0; idxR < m_listOfRecords.size(); ++idxR) {
     m_loaLabels.push_back(make_pair(m_listOfRecords[idxR]->GetModificationTimeStr(),
 				    m_listOfRecords[idxR]->GetAccountName()));
