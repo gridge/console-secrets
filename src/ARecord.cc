@@ -66,12 +66,12 @@ ARecord::ARecord(string pAccountName, string pFields, string pDelim) :
 	toadd = toadd.substr(0,toadd.size()-1);
 	m_essentials.push_back(toadd);
       }
-      m_fields.push_back(make_pair<string, string>(toadd, string("")));
+      m_fields.push_back(make_pair(toadd, string("")));
     }
     str = str.substr(cutAt+pDelim.size());
   }
   if(str.length() > 0) {
-    m_fields.push_back(make_pair<string, string>(str, string("")));
+    m_fields.push_back(make_pair(str, string("")));
   }  
 }
 
@@ -119,7 +119,7 @@ void ARecord::AddField(string pTitle, string &pContent)
     return;
   }
   if (!title.empty())
-    m_fields.push_back( make_pair<string, string>(title, content));
+    m_fields.push_back( make_pair(title, content));
   else
     if (log)
       log->say(ILog::WARNING, string("Trying to add empty element to ARecord") + m_accountName, "ARecord");

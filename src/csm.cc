@@ -15,6 +15,7 @@
 #include <string>
 #include <sstream>
 #include <getopt.h>
+#include <algorithm>
 
 // --- Base includes
 #include "csm.h"
@@ -25,6 +26,7 @@ using namespace std;
 
 void CleanUp();
 void Usage(char **argv);
+std::string cleanForCSV(std::string str);
 
 /** CSM Main function */
 int main(int argc, char **argv)
@@ -70,6 +72,9 @@ int main(int argc, char **argv)
   // - Create new source
   string cfg_userName;
   string cfg_userKey;
+  // - Export to file
+  string cfg_exportFilename;
+  
   int c;
   //int digit_optind = 0;
   while (1) {
@@ -89,10 +94,12 @@ int main(int argc, char **argv)
 	{"create", no_argument, 0, 'C'},
 	{"key", required_argument, 0, 'k'},
 	{"user", required_argument, 0, 'u'},
+  //Export to CSV file
+  {"export-csv", required_argument, 0, 'x'},
 	//trailer
 	{0, 0, 0, 0}
       };    
-    c = getopt_long (argc, argv, "hs:fc:evCk:u:", csm_options, &option_index); 
+    c = getopt_long (argc, argv, "hs:fc:evCk:u:x:", csm_options, &option_index); 
 
     if (c==-1)
       break;
@@ -130,6 +137,10 @@ int main(int argc, char **argv)
       cfg_userName = optarg;
       *log << ILog::INFO << "User name from command-line: " << cfg_userName << ILog::endmsg;
       break;
+    case 'x':
+      cfg_exportFilename = optarg;
+      *log << ILog::INFO << "Export to CSV file:: " << cfg_exportFilename << ILog::endmsg;
+      break;
     case 'h':
     default:
       Usage(argv);
@@ -139,7 +150,10 @@ int main(int argc, char **argv)
 
   if (cfg_action == act_nActions) {
     //set default action
-    if (optind < argc) {
+    if (not cfg_exportFilename.empty()) {
+      //export to CSV file
+      cfg_action = act_export;
+    } else if (optind < argc) {
       //arguments found, perform a quick search on them
       cfg_action = act_quickSearch;
     } else {
@@ -358,6 +372,57 @@ int main(int argc, char **argv)
     }
     log->say(ILog::INFO, "New source created successfully");
     cout << "New Source created successfully: " << inSource.GetFullURI() << endl;    
+  } if (cfg_action == act_export) {
+    vector<string> csvColumns = {"Name", "Date", "Labels"};    
+    log->say(ILog::INFO, "Starting export to CSV file");
+    vector<ARecord*> resultSearch;
+    resultSearch = ioSvc->GetAllAccounts(IIOService::ACCOUNTS_SORT_BYNAME);
+    //First, find out all possible column names    
+    for (vector<ARecord*>::iterator it = resultSearch.begin(); it != resultSearch.end(); ++it) {
+      for (ARecord::TFieldsIterator fit = (*it)->GetFieldsIterBegin(); fit != (*it)->GetFieldsIterEnd(); ++fit) {
+        if ( std::find_if(csvColumns.begin(), csvColumns.end(), [fit](std::string& element) -> bool { return (element == fit->first);}) == csvColumns.end() )
+          csvColumns.push_back(fit->first);
+      }
+    }
+    //Now write the output CSV file
+    ofstream csvOut;
+    csvOut.open(cfg_exportFilename.c_str());
+    bool first_entry=true;
+    for (vector<string>::iterator itColNames = csvColumns.begin(); itColNames != csvColumns.end(); ++itColNames) {
+      std::string cleanStr = cleanForCSV(*itColNames);
+      if (first_entry) first_entry = false;
+      else csvOut << ", ";
+      csvOut << cleanStr;
+    } //loop over columns
+    csvOut << endl;
+    for (vector<ARecord*>::iterator it = resultSearch.begin(); it != resultSearch.end(); ++it) {
+      map<string, string> outCsvRow;
+      outCsvRow["Name"] = (*it)->GetAccountName();
+      outCsvRow["Date"] = (*it)->GetModificationTimeStr();
+      string labels;
+      for (ARecord::TLabelsIterator lit = (*it)->GetLabelsIterBegin(); lit != (*it)->GetLabelsIterEnd(); ++lit) {
+        if (not labels.empty()) {
+          labels = labels + ", ";
+        }
+        labels = labels + *lit;
+      }
+      outCsvRow["Labels"] = labels;
+      for (ARecord::TFieldsIterator fit = (*it)->GetFieldsIterBegin(); fit != (*it)->GetFieldsIterEnd(); ++fit) {
+        outCsvRow[fit->first] = fit->second;
+      }
+      first_entry=true;
+      for (vector<string>::iterator itColNames = csvColumns.begin(); itColNames != csvColumns.end(); ++itColNames) {
+        if (first_entry) first_entry = false;
+        else csvOut << ", ";
+        map<string,string>::iterator itColVal;
+        itColVal = outCsvRow.find(*itColNames);
+        if ( itColVal != outCsvRow.end() ) {
+          csvOut << cleanForCSV(itColVal->second);
+        } 
+      }
+      csvOut << endl;
+    }
+    csvOut.close();
   } else {
     log->say(ILog::FATAL, "Unable to determine action");
     cerr << "Unrecognized action. Exiting." << endl;    
@@ -513,6 +578,27 @@ void Usage(char **argv)
   cerr << "Create a new source with name *newSourceName* for storing your passwords. All general options are also valid." << endl;
   cerr << "\t -k, --key\t Set the secret key identifier to be used for encryption" << endl;
   cerr << "\t -u, --user\t Set username to be associated to the source (default: " << strHelp_userDefault << ")" << endl;
+  cerr << "* " << argv[0] << " (--export | -x outputFile) " << std::endl;
+  cerr << "Export to outputFile in CSV format. All general options are also valid." << endl;
 
   cerr << std::endl;
+}
+
+
+
+string cleanForCSV(string str)
+{
+  //escape characters
+  std::string::size_type n = 0;
+  if ((str.find(",") != string::npos) or str[0] == '"' ) {
+    //contains at least one comma or starts with a ", quote the string
+    n=0;
+    while ( ( n = str.find( "\"", n ) ) != std::string::npos )
+      {
+        str.replace( n, 1, "\"\"" ); //double-quote escape of single-quote
+        n += 2;
+      }
+    str = string("\"") + str + string("\"");
+  }
+  return str;
 }

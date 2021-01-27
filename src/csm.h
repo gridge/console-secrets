@@ -48,6 +48,7 @@ enum CmdLineActions {
   act_startGui=0,
   act_quickSearch,
   act_createSource,
+  act_export,
   act_nActions
 };
 
